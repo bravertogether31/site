@@ -11,6 +11,8 @@ if((statSync(path).mode&0o077)!==0)throw Error("Unsafe staging secrets");
 const url=readFileSync(path,"utf8").trim();
 if(!new URL(url).hostname.startsWith("ep-blue-grass-azc3wque"))throw Error("Not staging DB");
 const db=new pg.Client({connectionString:url,ssl:{rejectUnauthorized:true}});
+const baseOrigin=process.env.BRAVER_BROWSER_QA_ORIGIN||"http://localhost:3912";
+if(!["http://localhost:3912","https://braver-neon-staging-20261107.onrender.com"].includes(baseOrigin))throw Error("Refusing unknown QA browser origin");
 const id=randomUUID(),email="braver-browser-qa-"+randomUUID()+"@example.invalid";
 const password="Synthetic!"+randomBytes(30).toString("base64url");
 const oldHash=(await bcryptHash(password,10)).replace(/^\$2b\$/,"$2a$");
@@ -29,7 +31,7 @@ try{
  const errors=[];
  const page=await context.newPage();
  page.on("pageerror",error=>errors.push(error.message.slice(0,180)));
- await page.goto("http://localhost:3912/auth?mode=signin",{waitUntil:"domcontentloaded",timeout:25000});
+ await page.goto(baseOrigin+"/auth?mode=signin",{waitUntil:"domcontentloaded",timeout:25000});
  await page.getByRole("heading",{name:/sign in to continue/i}).waitFor({timeout:25000});
  console.log("PASS isolated Chromium loads Neon native sign-in screen");
  await page.getByRole("textbox",{name:/email address/i}).fill(email);
@@ -64,13 +66,13 @@ try{
  assert.ok(count.rows[0].n>=1,"Initial question missing from messages");
  console.log("PASS member browser support request created conversation and initial message");
 
- await page.goto("http://localhost:3912/profile",{waitUntil:"domcontentloaded"});
+ await page.goto(baseOrigin+"/profile",{waitUntil:"domcontentloaded"});
  await page.waitForLoadState("networkidle",{timeout:30000}).catch(()=>{});
  assert.equal(new URL(page.url()).pathname,"/profile","Profile redirected away from signed-in account");
  console.log("PASS protected member profile route opens in browser");
  const anonContext=await browser.newContext({viewport:{width:375,height:780}});
  const guest=await anonContext.newPage();
- await guest.goto("http://localhost:3912/messages",{waitUntil:"domcontentloaded"});
+ await guest.goto(baseOrigin+"/messages",{waitUntil:"domcontentloaded"});
  await guest.waitForURL(u=>u.pathname==="/auth",{timeout:20000});
  console.log("PASS anonymous browser redirected from protected messages");
  await anonContext.close();
