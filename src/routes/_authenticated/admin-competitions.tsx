@@ -90,6 +90,12 @@ const REVIEW_STATUSES = [
   ["disqualified", "Disqualified"],
 ] as const;
 
+function dateInputValue(value: string | Date | null | undefined): string {
+  if (!value) return "";
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+}
+
 function localDateTime(value: string | null) {
   if (!value) return "";
   const date = new Date(value);
@@ -224,7 +230,7 @@ function AdminCompetitionsPage() {
             <Field label="Opening date and time" type="datetime-local" value={form.opensAt} onChange={(value) => setForm((current) => current ? { ...current, opensAt: value } : current)} icon={CalendarClock} />
             <Field label="Closing date and time" type="datetime-local" value={form.closesAt} onChange={(value) => setForm((current) => current ? { ...current, closesAt: value } : current)} icon={CalendarClock} />
             <details className="rounded-xl border p-4"><summary className="cursor-pointer font-semibold">Create a draft competition</summary><div className="mt-4 grid gap-3"><label>Title<input className="block w-full rounded-lg border p-2" value={draftTitle} onChange={e=>setDraftTitle(e.target.value)} /></label><label>URL name<input className="block w-full rounded-lg border p-2" placeholder="competition-name-2026" value={draftSlug} onChange={e=>setDraftSlug(e.target.value)} /></label><label>Category<select className="block w-full rounded-lg border p-2" value={draftCategory} onChange={e=>setDraftCategory(e.target.value as "essay"|"public-speaking")}><option value="essay">Essay</option><option value="public-speaking">Public speaking</option></select></label><button type="button" disabled={saving||draftTitle.length<5||!draftSlug} onClick={addDraft} className="rounded-full border px-4 py-2">Create hidden draft</button></div></details>
-            <label className="grid gap-2 text-sm">Results date (UTC)<input type="date" className="rounded-xl border p-3" value={state.competition.results_at?.slice(0,10)??""} onChange={e=>setState({...state,competition:{...state.competition,results_at:e.target.value?`${e.target.value}T00:00:00Z`:null}})} /></label>
+            <label className="grid gap-2 text-sm">Results date (UTC)<input type="date" className="rounded-xl border p-3" value={dateInputValue(state.competition.results_at)} onChange={e=>setState({...state,competition:{...state.competition,results_at:e.target.value?`${e.target.value}T00:00:00Z`:null}})} /></label>
             <label className="grid gap-2 text-sm">Competition<select aria-label="Competition" value={state.competition.slug} onChange={e => { setSelected(e.target.value); void load(e.target.value); }} className="rounded-xl border bg-background p-3">{state.competitions.map(c => <option key={c.id} value={c.slug}>{c.title}</option>)}</select></label>
             <label className="flex items-center gap-2"><input type="checkbox" checked={state.competition.is_public} onChange={e => setState({ ...state, competition: { ...state.competition, is_public: e.target.checked } })} />Publicly visible (drafts remain hidden)</label>
             <label className="grid gap-2 text-sm">Prompts (separate with a blank line)<textarea className="min-h-48 rounded-xl border p-3" value={state.competition.prompts.join('\n\n')} onChange={e => setState({ ...state, competition: { ...state.competition, prompts: e.target.value.split('\n\n') } })} /></label>

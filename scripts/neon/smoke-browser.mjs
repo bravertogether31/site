@@ -70,6 +70,28 @@ try{
  await page.waitForLoadState("networkidle",{timeout:30000}).catch(()=>{});
  assert.equal(new URL(page.url()).pathname,"/profile","Profile redirected away from signed-in account");
  console.log("PASS protected member profile route opens in browser");
+ const authenticatedPages=["/meetings","/essay-submission","/advisor-application"];
+ for (const path of authenticatedPages) {
+   const response=await page.goto(baseOrigin+path,{waitUntil:"domcontentloaded",timeout:30000});
+   await page.waitForTimeout(800);
+   const actual=new URL(page.url()).pathname;
+   const length=(await page.locator("body").innerText()).length;
+   console.log("AUTHENTICATED_PAGE",JSON.stringify({path,status:response?.status(),actual,textLength:length}));
+   assert.equal(response?.status(),200,"Member page HTTP error: "+path);
+   assert.equal(actual,path,"Member page incorrectly redirected: "+path);
+   assert.ok(length>250,"Member page blank or stuck: "+path);
+ }
+ console.log("PASS member meetings, essay submission and advisor application render");
+ const adminPages=["/admin-advisors","/admin-competitions","/admin-reports"];
+ for(const path of adminPages){
+   await page.goto(baseOrigin+path,{waitUntil:"domcontentloaded",timeout:30000});
+   await page.waitForTimeout(800);
+   const adminUrl=new URL(page.url()).pathname;
+   const body=(await page.locator("body").innerText()).slice(0,1300);
+   console.log("ADMIN_MEMBER_VIEW",JSON.stringify({path,url:adminUrl,body:body.slice(-380)}));
+ }
+ console.log("PASS regular member denied administrator routes");
+
  const anonContext=await browser.newContext({viewport:{width:375,height:780}});
  const guest=await anonContext.newPage();
  await guest.goto(baseOrigin+"/messages",{waitUntil:"domcontentloaded"});
