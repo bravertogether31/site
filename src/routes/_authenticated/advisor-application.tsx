@@ -262,10 +262,17 @@ function AdvisorApplicationPage() {
         } });
 
         setStage("uploading");
-        const { error: uploadError } = await supabase.storage
-          .from(ADVISOR_CV_BUCKET)
-          .uploadToSignedUrl(prepared.filePath, prepared.uploadToken, file, { contentType: mimeType });
-        if (uploadError) throw uploadError;
+        if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+          const response = await fetch(prepared.uploadToken, {
+            method: "PUT", headers: { "Content-Type": mimeType }, body: file,
+          });
+          if (!response.ok) throw new Error("The private file upload failed.");
+        } else {
+          const { error: uploadError } = await supabase.storage
+            .from(ADVISOR_CV_BUCKET)
+            .uploadToSignedUrl(prepared.filePath, prepared.uploadToken, file, { contentType: mimeType });
+          if (uploadError) throw uploadError;
+        }
 
         setStage("verifying");
         await finalizeCv({ data: { applicationId: prepared.applicationId, filePath: prepared.filePath } });

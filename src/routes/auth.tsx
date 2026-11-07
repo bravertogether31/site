@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { AdvisorIntentTrigger } from "@/components/AdvisorIntentDialog";
+import { NeonAuthPanel } from "@/components/NeonAuthPanel";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 import { Eyebrow, Section, SiteLayout } from "@/components/SiteLayout";
 import {
@@ -60,7 +61,7 @@ export const Route = createFileRoute("/auth")({
       },
     ],
   }),
-  component: AuthPage,
+  component: import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? NeonAuthPanel : AuthPage,
 });
 
 function readSignupDraft(): SignupDraft | null {

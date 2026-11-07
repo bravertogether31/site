@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { SiteLayout, Section, Eyebrow } from "@/components/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import type { EffectiveAccountRole } from "@/lib/account-access";
-import { getAccountAccessState } from "@/lib/account-access.functions";
+import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
@@ -49,6 +49,7 @@ function normalizeBookingUrl(value: string): string | null {
 
 function ProfilePage() {
   const getAccess = useServerFn(getAccountAccessState);
+  const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);

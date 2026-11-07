@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { getNeonBrowserClient } from "@/integrations/neon/browser";
 import type { Database } from "./types";
 
 function isNewSupabaseApiKey(value: string): boolean {
@@ -126,6 +127,9 @@ let supabaseClient: ReturnType<typeof createSupabaseClient> | undefined;
 
 export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
   get(_, property, receiver) {
+    if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+      return Reflect.get(getNeonBrowserClient(),property);
+    }
     if (!supabaseClient) supabaseClient = createSupabaseClient();
     return Reflect.get(supabaseClient, property, receiver);
   },

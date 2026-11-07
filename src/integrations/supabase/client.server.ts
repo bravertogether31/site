@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { getNeonAdminClient } from "@/integrations/neon/admin.server";
 import type { CompetitionDatabase as Database } from "@/lib/competition-database.types";
 
 function isNewSupabaseApiKey(value: string): boolean {
@@ -58,6 +59,9 @@ let supabaseAdminClient: ReturnType<typeof createSupabaseAdminClient> | undefine
 // This client bypasses RLS. Import it only inside trusted server-side handlers.
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdminClient>, {
   get(_, property, receiver) {
+    if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      return Reflect.get(getNeonAdminClient(), property);
+    }
     if (!supabaseAdminClient) supabaseAdminClient = createSupabaseAdminClient();
     return Reflect.get(supabaseAdminClient, property, receiver);
   },

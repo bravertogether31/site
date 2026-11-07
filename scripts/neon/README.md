@@ -60,3 +60,13 @@ The synthetic staging test with `BRAVER_STAGING_ORIGIN=http://localhost:3912` pa
 **Flag combinations:** `VITE_BRAVER_AUTH_PROVIDER` is BUILD-time, `BRAVER_AUTH_PROVIDER` is RUNTIME. Both must match. `NEON_AUTH_PROXY_ENABLED` and `NEON_LEGACY_LOGIN_ENABLED` must stay `0` on production until all protected features are fully migrated. `BRAVER_ALLOW_LOCALHOST_TESTS` must never be enabled on a public deployment.
 
 **Unfinished release gates:** current Supabase data freshness; missing private essay PDF binary; signup/OTP/reset; original profile/message/meeting/competition services still use Supabase Admin/Storage/Realtime; advisor/teen/admin end-to-end permissions and all pages in an externally reachable staging deployment; final data sync, rollback and live cutover. This checkpoint is **NOT SAFE TO MERGE TO MAIN**.
+
+## 2026-11-07 private-storage and service migration checkpoint
+
+- Staging Neon private S3 buckets (`essay-submissions`, `advisor-cvs`) passed signed PUT, HEAD, GET, byte length and SHA-256 round-trip verification; temporary objects deleted. Browser CORS configured and read back on the staging buckets only.
+- New server-only Neon Admin SQL adapter implements validated table selection, parameterized filters, inserts, upserts, updates, private document presigning/downloads and two original RPCs; `scripts/neon/smoke-admin.mjs` passed synthetic insert/read/update/upsert/RPC and cleanup. Unsafe unfiltered writes are refused.
+- New browser-side Neon Data API adapter obtains a signed per-session JWT from the first-party Neon Auth proxy. Messaging and meeting pages use polling fallback in Neon mode instead of Supabase Realtime, preserving the Supabase implementation when the flag is off.
+- New opt-in Neon Auth page supports password sign-in, legacy-password upgrade, native signup, emailed-code verification and recovery UI. Native signup on isolated staging was verified to create a matching original auth.users record, profile and member role while leaving email unverified and no signed-in session. Test identity removed afterward.
+- Staging-only native signup trigger is tracked in `20261107_native_auth_user_sync.sql`. It must not be applied to live Neon until final integration/security acceptance.
+- Build, TypeScript, repository tests and ESLint all passed (15 previously known lint warnings, no errors), with build-time Neon mode enabled.
+- **DO NOT MERGE OR DEPLOY TO PRODUCTION**: original November 1 snapshot freshness and missing private essay PDF unresolved; actual email OTP delivery, original 12 accounts, private messaging/meeting forms, admin/advisor controls and every browser page still require external staging E2E and controlled cutover.

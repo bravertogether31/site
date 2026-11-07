@@ -23,7 +23,7 @@ import { SiteLayout, Section } from "@/components/SiteLayout";
 import { SupportRequestDialog } from "@/components/SupportRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { roleHome } from "@/lib/account-access";
-import { getAccountAccessState } from "@/lib/account-access.functions";
+import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 import { askSupportAi, claimConversation, closeConversation } from "@/lib/support.functions";
 import { cn } from "@/lib/utils";
 
@@ -81,6 +81,7 @@ function MessagesPage() {
   const navigate = useNavigate();
   const claim = useServerFn(claimConversation);
   const getAccess = useServerFn(getAccountAccessState);
+  const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const [me, setMe] = useState<MeProfile | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +131,10 @@ function MessagesPage() {
   useEffect(() => {
     if (!me) return;
     void loadConversations();
+    if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+      const poll = window.setInterval(() => void loadConversations(), 5000);
+      return () => window.clearInterval(poll);
+    }
     const channel = supabase
       .channel(`support-inbox-${me.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => void loadConversations())
@@ -515,6 +520,13 @@ function Thread({
   useEffect(() => {
     void loadMessages();
     void markRead();
+    if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+      const poll = window.setInterval(() => {
+        void loadMessages();
+        void markRead();
+      }, 4000);
+      return () => window.clearInterval(poll);
+    }
     const channel = supabase
       .channel(`thread-${conversation.id}`)
       .on(

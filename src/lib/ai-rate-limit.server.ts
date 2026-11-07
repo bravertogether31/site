@@ -12,7 +12,8 @@ function requestAddress(): string {
 }
 
 function hashActor(value: string): string {
-  const salt = process.env.AI_RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "braver-together";
+  const salt = process.env.AI_RATE_LIMIT_SALT || (process.env.BRAVER_AUTH_PROVIDER === "neon" ? "" : process.env.SUPABASE_SERVICE_ROLE_KEY || "braver-together");
+  if (salt.length < 32 && process.env.BRAVER_AUTH_PROVIDER === "neon") throw new Error("Secure AI rate limit key is not configured");
   return createHash("sha256").update(`${salt}:${value}`).digest("hex");
 }
 

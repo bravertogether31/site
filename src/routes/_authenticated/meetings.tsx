@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { SiteLayout, Section, Eyebrow } from "@/components/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { roleHome, type EffectiveAccountRole } from "@/lib/account-access";
-import { getAccountAccessState } from "@/lib/account-access.functions";
+import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 import { createMeetingProposal, listMeetingProposals, respondMeetingProposal } from "@/lib/meeting.functions";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/meetings")({
 function MeetingsPage() {
   const navigate = useNavigate();
   const getAccess = useServerFn(getAccountAccessState);
+  const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const createProposal = useServerFn(createMeetingProposal);
   const listProposals = useServerFn(listMeetingProposals);
   const respond = useServerFn(respondMeetingProposal);
@@ -71,6 +72,10 @@ function MeetingsPage() {
       return;
     }
     void loadProposals(selectedId);
+    if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+      const poll = window.setInterval(() => void loadProposals(selectedId), 6000);
+      return () => window.clearInterval(poll);
+    }
     const channel = supabase.channel(`meetings-${selectedId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "meeting_proposals", filter: `conversation_id=eq.${selectedId}` }, () => void loadProposals(selectedId))
       .subscribe();
