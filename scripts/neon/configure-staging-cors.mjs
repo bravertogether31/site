@@ -10,7 +10,7 @@ const client=new S3Client({
   region:s.region, endpoint:s.endpoint,forcePathStyle:true,
   credentials:{accessKeyId:s.accessKeyId,secretAccessKey:s.secretAccessKey}
 });
-const origins=["http://localhost:3912","https://braver-neon-staging.onrender.com"];
+const origins=["http://localhost:3912","https://braver-neon-staging-20261107.onrender.com"];
 for(const bucket of ["essay-submissions","advisor-cvs"]){
   await client.send(new PutBucketCorsCommand({Bucket:bucket,CORSConfiguration:{CORSRules:[{
     AllowedOrigins:origins,AllowedMethods:["PUT","GET","HEAD"],
