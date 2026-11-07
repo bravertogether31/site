@@ -32,6 +32,23 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
+    if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      const request = getRequest();
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw new Error("Unauthorized: A Neon bearer token is required.");
+      }
+      const token = authHeader.slice("Bearer ".length).trim();
+      const { verifiedNeonRequest } = await import("@/integrations/neon/verified-access.server");
+      const { userId, claims, client } = await verifiedNeonRequest(token);
+      return next({
+        context: {
+          supabase: client as unknown as ReturnType<typeof createClient<Database>>,
+          userId,
+          claims,
+        },
+      });
+    }
     const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const supabasePublishableKey =
       process.env.SUPABASE_PUBLISHABLE_KEY ||

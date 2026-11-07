@@ -40,12 +40,14 @@ const COMMENT_TTL_MS = 60 * 60 * 1000;
 
 export const getResourceLibrary = createServerFn({ method: "GET" }).handler(async () => {
   try {
+    const { getNeonPublicClient, publicNeonEnabled } = await import("@/integrations/neon/public.server");
+    const client = (publicNeonEnabled() ? getNeonPublicClient() : supabase) as unknown as import("@supabase/postgrest-js").PostgrestClient;
     const [categoriesResult, videosResult] = await Promise.all([
-      supabase
+      client
         .from("resource_categories")
         .select("id, label, description, sort_order")
         .order("sort_order", { ascending: true }),
-      supabase
+      client
         .from("resource_videos")
         .select(
           "id, youtube_video_id, title, description, category_id, duration_text, thumbnail_url, comments_enabled, sort_order",

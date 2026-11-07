@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
 import { roleHome } from "@/lib/account-access";
-import { getAccountAccessState } from "@/lib/account-access.functions";
+import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 import { cn } from "@/lib/utils";
 
 const AuthSearch = z.object({
@@ -105,6 +105,7 @@ function clearSignupDraft() {
 function AuthPage() {
   const navigate = useNavigate();
   const getAccess = useServerFn(getAccountAccessState);
+  const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const { mode: requestedMode, recovery: requestedRecovery } = Route.useSearch();
 
   const [mode, setMode] = useState<AuthMode>(requestedMode ?? "signup");
@@ -126,7 +127,8 @@ function AuthPage() {
   const [hydrating, setHydrating] = useState(true);
 
   const continueAfterAuth = useCallback(async () => {
-    const access = await getAccess();
+    const access = import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon"
+      ? await getNeonAccess() : await getAccess();
     await navigate({
       to: roleHome(access.role),
       ...(access.role === "member" || access.role === "advisor"
@@ -134,7 +136,7 @@ function AuthPage() {
         : {}),
       replace: true,
     });
-  }, [getAccess, navigate]);
+  }, [getAccess, getNeonAccess, navigate]);
 
   useEffect(() => {
     const nextMode = requestedMode ?? "signup";
@@ -524,6 +526,34 @@ function AuthPage() {
     setInlineMessage(null);
 
     try {
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const authenticate = () => fetch("/api/neon-auth/sign-in/email", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalizedEmail, password }),
+        });
+        let response = await authenticate();
+        if (!response.ok && response.status === 401) {
+          // Existing Supabase members do not yet have native Neon credentials.
+          // The server validates the original bcrypt password with a strict
+          // per-account rate limit, then creates only a native credential.
+          const upgrade = await fetch("/api/neon-legacy-login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: normalizedEmail, password }),
+          });
+          if (upgrade.ok && (await upgrade.json())?.ok === true) {
+            response = await authenticate();
+          }
+        }
+        if (!response.ok) throw new Error("Invalid email or password.");
+        window.dispatchEvent(new Event("braver-neon-auth-change"));
+        toast.success("Signed in");
+        await continueAfterAuth();
+        return;
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password,

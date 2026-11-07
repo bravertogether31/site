@@ -123,6 +123,15 @@ async function requireAdmin(userId: string) {
 }
 
 async function selectedCompetition(slug?: string, includeDraft = false) {
+  const { getNeonPublicClient, publicNeonEnabled } = await import("@/integrations/neon/public.server");
+  if (!includeDraft && publicNeonEnabled()) {
+    let query = getNeonPublicClient().from("competitions").select("*").eq("is_public", true).neq("status", "draft");
+    if (slug) query = query.eq("slug", slug);
+    const result = await query.order("opens_at", { ascending: false, nullsFirst: false }).limit(1).maybeSingle();
+    if (result.error) throw new Error("Competitions could not be loaded. Please try again.");
+    if (!result.data) throw new Error("Competition not found.");
+    return result.data as import("@/lib/competition-database.types").CompetitionDatabase["public"]["Tables"]["competitions"]["Row"];
+  }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   let query = supabaseAdmin.from("competitions").select("*");
   if (!includeDraft) query = query.eq("is_public", true).neq("status", "draft");
@@ -134,8 +143,19 @@ async function selectedCompetition(slug?: string, includeDraft = false) {
 }
 
 export const listPublicCompetitions = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.from("competitions").select("*").eq("is_public", true).neq("status", "draft").order("opens_at", { ascending: false });
+  const { getNeonPublicClient, publicNeonEnabled } = await import("@/integrations/neon/public.server");
+  let data: import("@/lib/competition-database.types").CompetitionDatabase["public"]["Tables"]["competitions"]["Row"][] | null = null;
+  let error: { message: string } | null = null;
+  if (publicNeonEnabled()) {
+    const result = await getNeonPublicClient().from("competitions").select("*").eq("is_public", true).neq("status", "draft").order("opens_at", { ascending: false });
+    data = result.data as typeof data;
+    error = result.error;
+  } else {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const result = await supabaseAdmin.from("competitions").select("*").eq("is_public", true).neq("status", "draft").order("opens_at", { ascending: false });
+    data = result.data;
+    error = result.error;
+  }
   if (error) throw new Error("Competitions could not be loaded. Please try again.");
   return (data ?? []).map(c => ({ ...c, acceptingSubmissions: competitionIsOpen(c) }));
 });

@@ -2,7 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
-import { getAccountAccessState } from "@/lib/account-access.functions";
+import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 import {
   resolveAccountAccess,
   type AccountAccessState,
@@ -18,6 +18,7 @@ export function clearAccountAccessCache(userId?: string) {
 export function useAccountAccess() {
   const auth = useAuth();
   const getAccess = useServerFn(getAccountAccessState);
+  const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const [account, setAccount] = useState<AccountAccessState | null>(() =>
     auth.user ? accountAccessCache.get(auth.user.id) ?? null : null,
   );
@@ -31,7 +32,8 @@ export function useAccountAccess() {
       if (!userId) return null;
       if (showLoading) setAccountLoading(true);
       try {
-        const next = (await getAccess()) as AccountAccessState;
+        const next = (await (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon"
+          ? getNeonAccess() : getAccess())) as AccountAccessState;
         accountAccessCache.set(userId, next);
         setAccount(next);
         return next;
@@ -50,7 +52,7 @@ export function useAccountAccess() {
         setAccountLoading(false);
       }
     },
-    [auth.user?.id, getAccess],
+    [auth.user?.id, getAccess, getNeonAccess],
   );
 
   useEffect(() => {

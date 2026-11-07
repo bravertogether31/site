@@ -10,6 +10,31 @@ import {
 
 export const loadAccountAccessState = createServerOnlyFn(
   async (userId: string): Promise<AccountAccessState> => {
+    if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      const { getNeonServerDatabasePool } = await import("@/integrations/neon/legacy-login.server");
+      const rows = await getNeonServerDatabasePool().query<{
+        is_advisor: boolean;
+        roles: string[];
+        application_status: string | null;
+        has_intent: boolean;
+      }>(
+        `SELECT p.is_advisor,
+          COALESCE((SELECT array_agg(r.role::text) FROM public.user_roles r WHERE r.user_id=p.id),ARRAY[]::text[]) AS roles,
+          (SELECT a.status::text FROM public.advisor_applications a WHERE a.user_id=p.id LIMIT 1) AS application_status,
+          EXISTS(SELECT 1 FROM public.advisor_onboarding_intents i WHERE i.user_id=p.id) AS has_intent
+         FROM public.profiles p WHERE p.id=$1::uuid`, [userId]);
+      const state = rows.rows[0];
+      const roles = new Set(state?.roles || []);
+      const applicationStatus = (state?.application_status as AdvisorApplicationStatus | undefined) ?? null;
+      return resolveAccountAccess({
+        hasMemberRole: roles.has("teen"),
+        hasAdvisorRole: roles.has("advisor"),
+        hasAdminRole: roles.has("admin"),
+        profileIsAdvisor: state?.is_advisor === true,
+        applicationStatus,
+        isApplicant: Boolean(state?.has_intent || applicationStatus),
+      });
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [profileResult, rolesResult, applicationResult, intentResult] =
       await Promise.all([
@@ -85,3 +110,12 @@ export const requireAccountRole = createServerOnlyFn(
 export const getAccountAccessState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => loadAccountAccessState(context.userId));
+
+// Managed Neon Auth cookies are checked server-side before any account role is returned.
+// The legacy Supabase route remains unchanged until the entire provider switch.
+export const getNeonAccountAccessState = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { requireNeonAccountSession } = await import("@/integrations/neon/auth.server");
+    const { id } = await requireNeonAccountSession();
+    return loadAccountAccessState(id);
+  });
