@@ -63,7 +63,7 @@ function ProfilePage() {
     try {
       const [{ data: authData, error: authError }, access] = await Promise.all([
         supabase.auth.getUser(),
-        getAccess(),
+        (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getNeonAccess() : getAccess()),
       ]);
       if (authError) throw authError;
       if (!authData.user) throw new Error("Your session has expired. Please sign in again.");

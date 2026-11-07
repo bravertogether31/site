@@ -99,7 +99,7 @@ function MessagesPage() {
     async function initialize() {
       const [{ data: auth }, access] = await Promise.all([
         supabase.auth.getUser(),
-        getAccess(),
+        (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getNeonAccess() : getAccess()),
       ]);
       if (!auth.user || cancelled) return;
       if (access.role !== "member" && access.role !== "advisor") {

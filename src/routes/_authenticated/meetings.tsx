@@ -87,7 +87,7 @@ function MeetingsPage() {
     try {
       const [{ data: auth, error: authError }, access] = await Promise.all([
         supabase.auth.getUser(),
-        getAccess(),
+        (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getNeonAccess() : getAccess()),
       ]);
       if (authError) throw authError;
       if (!auth.user) throw new Error("Please sign in again.");

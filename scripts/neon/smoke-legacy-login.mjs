@@ -8,7 +8,7 @@ import { createAuthClient } from "@neondatabase/auth";
 import { BetterAuthVanillaAdapter } from "@neondatabase/auth/vanilla/adapters";
 
 if (process.env.BRAVER_ALLOW_SYNTHETIC_LOGIN_TEST !== "1") throw Error("Synthetic test requires isolated-branch opt-in.");
-const f="/tmp/braver-staging-neon-db-url-20261107";
+const f="/tmp/braver-neon-staging-secrets-20261107/database-url";
 if((statSync(f).mode & 0o077)!==0) throw Error("Insecure local credential permissions");
 const url=readFileSync(f,"utf8").trim();
 if(!(new URL(url).hostname.startsWith("ep-blue-grass-azc3wque-pooler.") || new URL(url).hostname.startsWith("ep-blue-grass-azc3wque.")))throw Error("Not isolated test database");
@@ -18,7 +18,7 @@ const wrong="Incorrect!"+randomBytes(30).toString("base64url");
 const bcrypt=(await bcryptHash(password,10)).replace(/^\$2b\$/,"$2a$");
 const baseUrl=process.env.BRAVER_STAGING_ORIGIN||"http://localhost:3910";
 const client=new pg.Client({connectionString:url,ssl:{rejectUnauthorized:true},connectionTimeoutMillis:8000});
-let created=false;
+let created=false,conversationId=null;
 try{
  await client.connect();
  const initial=await client.query("SELECT count(*)::int AS n FROM auth.users");
@@ -91,6 +91,22 @@ try{
  const conversations=await readRls("conversations");
  assert.equal(conversations.length,0,"Synthetic member must not see other users private conversations");
  console.log("PASS Neon JWT authenticated RLS: own profile and role only, no unrelated messages");
+ conversationId=randomUUID();
+ const postHeaders={Authorization:"Bearer "+token,"Content-Type":"application/json",Prefer:"return=representation"};
+ const createdConversation=await fetch(rest+"/conversations?select=id,teen_id",{method:"POST",headers:postHeaders,body:JSON.stringify({id:conversationId,teen_id:id,subject:"Synthetic privacy QA",topic:"general",status:"open"})});
+ assert.equal(createdConversation.status,201,"Member conversation creation failed: "+(await createdConversation.text()).slice(0,250));
+ const own=await readRls("conversations");
+ assert.equal(own.length,1,"Member may only see their own conversation");
+ assert.equal(own[0].id,conversationId);
+ const sent=await fetch(rest+"/messages?select=id,sender_id,conversation_id",{method:"POST",headers:postHeaders,body:JSON.stringify({conversation_id:conversationId,sender_id:id,sender_kind:"human",body:"Synthetic private message QA"})});
+ assert.equal(sent.status,201,"Member message send failed: "+(await sent.text()).slice(0,250));
+ const texts=await readRls("messages");
+ assert.equal(texts.length,1,"Member saw unrelated messages or missing own message");
+ assert.equal(texts[0].conversation_id,conversationId);
+ const forgery=await fetch(rest+"/messages",{method:"POST",headers:postHeaders,body:JSON.stringify({conversation_id:conversationId,sender_id:randomUUID(),sender_kind:"human",body:"Impersonation blocked"})});
+ assert.ok(forgery.status===403||forgery.status===401,"Cross-user sender forgery was accepted");
+ console.log("PASS signed-in member creates private conversation, sends message, cannot forge sender, no cross-account disclosure");
+
  const accountResponse=await fetch(baseUrl+"/api/neon-account",{headers:{Cookie:sessionCookies}});
  assert.equal(accountResponse.status,200,"Account API must recognize Neon session cookie");
  const account=await accountResponse.json();
@@ -114,6 +130,10 @@ try{
 }finally{
  if(created){
   try{
+   if(conversationId){
+     await client.query('DELETE FROM public.messages WHERE conversation_id=$1',[conversationId]);
+     await client.query('DELETE FROM public.conversations WHERE id=$1',[conversationId]);
+   }
    await client.query('DELETE FROM neon_auth.session WHERE "userId"=$1',[id]);
    await client.query('DELETE FROM neon_auth.account WHERE "userId"=$1',[id]);
    await client.query('DELETE FROM neon_auth."user" WHERE id=$1',[id]);
