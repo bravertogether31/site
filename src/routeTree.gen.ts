@@ -15,6 +15,7 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NewsRouteImport } from './routes/news'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as DecoderRouteImport } from './routes/decoder'
 import { Route as CompetitionsRouteImport } from './routes/competitions'
 import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
@@ -25,6 +26,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$slug'
+import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedMeetingsRouteImport } from './routes/_authenticated/meetings'
@@ -62,6 +64,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const NewsRoute = NewsRouteImport.update({
   id: '/news',
   path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DecoderRoute = DecoderRouteImport.update({
@@ -111,6 +118,11 @@ const IndexRoute = IndexRouteImport.update({
 const CompetitionsSlugRoute = CompetitionsSlugRouteImport.update({
   id: '/competitions_/$slug',
   path: '/competitions/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSignupEmailCheckRoute = ApiSignupEmailCheckRouteImport.update({
+  id: '/api/signup-email-check',
+  path: '/api/signup-email-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -168,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
   '/decoder': typeof DecoderRoute
+  '/events': typeof EventsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/resources': typeof ResourcesRoute
@@ -182,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
 }
 export interface FileRoutesByTo {
@@ -193,6 +207,7 @@ export interface FileRoutesByTo {
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
   '/decoder': typeof DecoderRoute
+  '/events': typeof EventsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/resources': typeof ResourcesRoute
@@ -207,6 +222,7 @@ export interface FileRoutesByTo {
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
 }
 export interface FileRoutesById {
@@ -220,6 +236,7 @@ export interface FileRoutesById {
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
   '/decoder': typeof DecoderRoute
+  '/events': typeof EventsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/resources': typeof ResourcesRoute
@@ -234,6 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/meetings': typeof AuthenticatedMeetingsRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions_/$slug': typeof CompetitionsSlugRoute
 }
 export interface FileRouteTypes {
@@ -247,6 +265,7 @@ export interface FileRouteTypes {
     | '/community-guidelines'
     | '/competitions'
     | '/decoder'
+    | '/events'
     | '/news'
     | '/privacy'
     | '/resources'
@@ -261,6 +280,7 @@ export interface FileRouteTypes {
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/api/signup-email-check'
     | '/competitions/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -272,6 +292,7 @@ export interface FileRouteTypes {
     | '/community-guidelines'
     | '/competitions'
     | '/decoder'
+    | '/events'
     | '/news'
     | '/privacy'
     | '/resources'
@@ -286,6 +307,7 @@ export interface FileRouteTypes {
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/api/signup-email-check'
     | '/competitions/$slug'
   id:
     | '__root__'
@@ -298,6 +320,7 @@ export interface FileRouteTypes {
     | '/community-guidelines'
     | '/competitions'
     | '/decoder'
+    | '/events'
     | '/news'
     | '/privacy'
     | '/resources'
@@ -312,6 +335,7 @@ export interface FileRouteTypes {
     | '/_authenticated/meetings'
     | '/_authenticated/messages'
     | '/_authenticated/profile'
+    | '/api/signup-email-check'
     | '/competitions_/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -325,12 +349,14 @@ export interface RootRouteChildren {
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   CompetitionsRoute: typeof CompetitionsRoute
   DecoderRoute: typeof DecoderRoute
+  EventsRoute: typeof EventsRoute
   NewsRoute: typeof NewsRoute
   PrivacyRoute: typeof PrivacyRoute
   ResourcesRoute: typeof ResourcesRoute
   SafetyRoute: typeof SafetyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TeamRoute: typeof TeamRoute
+  ApiSignupEmailCheckRoute: typeof ApiSignupEmailCheckRoute
   CompetitionsSlugRoute: typeof CompetitionsSlugRoute
 }
 
@@ -376,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/news'
       fullPath: '/news'
       preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/decoder': {
@@ -446,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/competitions/$slug'
       fullPath: '/competitions/$slug'
       preLoaderRoute: typeof CompetitionsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/signup-email-check': {
+      id: '/api/signup-email-check'
+      path: '/api/signup-email-check'
+      fullPath: '/api/signup-email-check'
+      preLoaderRoute: typeof ApiSignupEmailCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -542,12 +582,14 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   CompetitionsRoute: CompetitionsRoute,
   DecoderRoute: DecoderRoute,
+  EventsRoute: EventsRoute,
   NewsRoute: NewsRoute,
   PrivacyRoute: PrivacyRoute,
   ResourcesRoute: ResourcesRoute,
   SafetyRoute: SafetyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TeamRoute: TeamRoute,
+  ApiSignupEmailCheckRoute: ApiSignupEmailCheckRoute,
   CompetitionsSlugRoute: CompetitionsSlugRoute,
 }
 export const routeTree = rootRouteImport
