@@ -45,7 +45,7 @@ try{
    const body=await page.locator("body").innerText();
    const routeOk=response?.status()===200&&body.includes(text);
    console.log("ADMIN_PAGE",JSON.stringify({route,status:response?.status(),routeOk,preview:routeOk?"OK":body.slice(0,480),errors:errors.slice(-2),failures:failures.slice(-6)}));
-   if(!routeOk)console.log("ADMIN_PAGE_FAILED",route);
+   assert.ok(routeOk,"Administrator page did not render: "+route);
  }
  console.log("PASS all three administrator pages render on real Render HTTPS staging");
  await context.close();

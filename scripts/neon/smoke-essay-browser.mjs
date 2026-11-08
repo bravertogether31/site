@@ -21,7 +21,8 @@ const pdf=Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 
 const digest=createHash("sha256").update(pdf).digest("hex");
 const db=new pg.Client({connectionString:conn,ssl:{rejectUnauthorized:true}});
 let userCreated=false,competitionCreated=false,submissionId=null,browser;
-const origin="http://localhost:3912";
+const origin=process.env.BRAVER_QA_ORIGIN||"http://localhost:3912";
+if(!["http://localhost:3912","https://braver-neon-staging-20261107.onrender.com"].includes(origin))throw Error("Not isolated QA origin");
 try{
  await db.connect();
  await db.query("INSERT INTO auth.users(id,email,encrypted_password,email_confirmed_at,created_at,raw_user_meta_data) VALUES($1,$2,$3,now(),now(),$4::jsonb)",[id,email,encrypted,JSON.stringify({display_name:"Synthetic Essay QA",signup_completed:true})]);userCreated=true;
