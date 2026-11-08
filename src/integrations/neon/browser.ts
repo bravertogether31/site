@@ -60,7 +60,7 @@ const auth = {
     return {data:{session:user?{user,access_token:await bearer()}:null},error:null};
   },
   async signOut(){
-    const res=await fetch("/api/neon-auth/sign-out",{method:"POST",credentials:"same-origin"});
+    const res=await fetch("/api/neon-auth/sign-out",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"});
     if(!res.ok)return {error:new Error("Could not sign out.")};
     authChange();return {error:null};
   },

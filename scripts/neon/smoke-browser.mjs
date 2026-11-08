@@ -98,6 +98,15 @@ try{
  await guest.waitForURL(u=>u.pathname==="/auth",{timeout:20000});
  console.log("PASS anonymous browser redirected from protected messages");
  await anonContext.close();
+ await page.goto(baseOrigin+"/messages",{waitUntil:"domcontentloaded",timeout:25000});
+ await page.getByRole("button",{name:"Account",exact:true}).click();
+ await page.getByRole("menu").getByRole("button",{name:"Sign out",exact:true}).click();
+ await page.waitForURL(u=>u.pathname==="/",{timeout:15000});
+ const afterSignout=await page.evaluate(async()=>fetch("/api/neon-account",{credentials:"same-origin",cache:"no-store"}).then(r=>r.status));
+ assert.equal(afterSignout,401,"Signed-out account retained an active first-party session");
+ await page.goto(baseOrigin+"/messages",{waitUntil:"domcontentloaded",timeout:25000});
+ await page.waitForURL(u=>u.pathname==="/auth",{timeout:15000});
+ console.log("PASS browser sign-out revokes live session and protects member routes");
  if(errors.length)console.log("BROWSER_PAGEERROR_COUNT",errors.length,errors.slice(0,3));
  await context.close();
 }finally{

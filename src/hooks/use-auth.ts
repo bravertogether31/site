@@ -97,6 +97,7 @@ export function useAuth() {
     if (!neonMode) return supabase.auth.signOut();
     const response = await fetch("/api/neon-auth/sign-out", {
       method: "POST", credentials: "same-origin",
+      headers: {"Content-Type": "application/json"}, body: "{}",
     });
     if (!response.ok) throw new Error("Sign out could not be completed.");
     cachedUser = null;
