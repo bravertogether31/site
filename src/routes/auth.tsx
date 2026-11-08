@@ -129,6 +129,18 @@ function AuthPage() {
   const continueAfterAuth = useCallback(async () => {
     const access = import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon"
       ? await getNeonAccess() : await getAccess();
+    const pendingCompetition = window.sessionStorage.getItem("braver_competition_resume");
+    if (access.role === "member" && pendingCompetition &&
+      /^[a-z0-9-]{1,120}$/.test(pendingCompetition)) {
+      window.sessionStorage.removeItem("braver_competition_resume");
+      await navigate({
+        to: "/essay-submission",
+        search: { competition: pendingCompetition },
+        replace: true,
+      });
+      return;
+    }
+    if (pendingCompetition) window.sessionStorage.removeItem("braver_competition_resume");
     await navigate({
       to: roleHome(access.role),
       ...(access.role === "member" || access.role === "advisor"
@@ -390,6 +402,7 @@ function AuthPage() {
           body:JSON.stringify({email:normalizedEmail,otp}),
         });
         if (!response.ok) throw new Error("The verification code is invalid or has expired.");
+        window.dispatchEvent(new Event("braver-neon-auth-change"));
         const verified = await supabase.auth.getSession();
         data = {user:verified.data.session?.user ?? null,session:verified.data.session};
       } else {
@@ -960,10 +973,11 @@ function AuthPage() {
               </form>
 
               <div className="mt-6 border-t border-border pt-5 text-center text-sm text-muted-foreground">
-                Interested in volunteering?{" "}
+                Want to volunteer as a Digital Legal Advisor?{" "}
                 <AdvisorIntentTrigger className="font-semibold text-teal underline underline-offset-4">
-                  Learn how advisor applications work
+                  Apply as a Digital Legal Advisor
                 </AdvisorIntentTrigger>
+                <p className="mt-2 text-xs">Create or sign in to a member account first. Advisor applications are reviewed before access is granted.</p>
               </div>
             </div>
           </div>

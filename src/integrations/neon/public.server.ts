@@ -29,6 +29,8 @@ function validatedEndpoint(value: string | undefined, kind: "auth" | "api"): str
 }
 
 let cached: { key: string; client: PostgrestClient } | undefined;
+let anonymousJwt: { key: string; token: string; until: number } | undefined;
+let anonymousPending: Promise<string> | undefined;
 
 export function publicNeonEnabled(): boolean {
   const mode = process.env.BRAVER_PUBLIC_DATA_PROVIDER ?? "supabase";
@@ -54,8 +56,24 @@ export function getNeonPublicClient(): PostgrestClient {
   const client = new PostgrestClient(dataApiUrl, {
     schema: "public",
     fetch: async (input, init) => {
-      const token = await auth.getJWTToken();
-      if (!token) throw new Error("Neon anonymous token not available; refusing unverified request.");
+      let token: string;
+      if (anonymousJwt?.key === key && anonymousJwt.until > Date.now()) {
+        token = anonymousJwt.token;
+      } else {
+        if (!anonymousPending) {
+          anonymousPending = auth.getJWTToken().then((value) => {
+            if (!value) throw new Error("Neon anonymous token not available; refusing unverified request.");
+            let until = Date.now() + 30_000;
+            try {
+              const payload = JSON.parse(Buffer.from(value.split(".")[1], "base64url").toString("utf8"));
+              if (typeof payload?.exp === "number") until = Math.min(until, payload.exp * 1000 - 30_000);
+            } catch { throw new Error("Invalid Neon anonymous token."); }
+            if (until > Date.now()) anonymousJwt = { key, token: value, until };
+            return value;
+          }).finally(() => { anonymousPending = undefined; });
+        }
+        token = await anonymousPending;
+      }
       const headers = new Headers(init?.headers);
       headers.set("Authorization", `Bearer ${token}`);
       headers.set("Cache-Control", "no-store");

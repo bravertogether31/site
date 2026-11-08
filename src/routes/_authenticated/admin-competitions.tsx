@@ -18,6 +18,7 @@ import { SiteLayout, Section, Eyebrow } from "@/components/SiteLayout";
 import {
   createCompetition,
   getEssayAdminState,
+  getEssayRegistrationCounts,
   getEssaySubmissionDownload,
   reviewEssaySubmission,
   updateCompetition,
@@ -121,6 +122,10 @@ function toForm(competition: Competition): CompetitionForm {
 
 function AdminCompetitionsPage() {
   const getState = useServerFn(getEssayAdminState);
+  const getRegistrationCounts = useServerFn(getEssayRegistrationCounts);
+  const [registrations,setRegistrations] = useState<Array<{
+    competition_id:string;title:string;registrations:number;submitted_essays:number;awaiting_essay:number;
+  }>>([]);
   const [selected, setSelected] = useState<string | undefined>();
   const saveCompetition = useServerFn(updateCompetition);
   const create = useServerFn(createCompetition);
@@ -142,8 +147,12 @@ function AdminCompetitionsPage() {
   async function load(slug = selected) {
     setLoading(true);
     try {
-      const result = await getState({ data: { slug } });
+      const [result, registrationCounts] = await Promise.all([
+        getState({ data: { slug } }),
+        import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getRegistrationCounts() : Promise.resolve([]),
+      ]);
       const next = result as AdminState;
+      setRegistrations(registrationCounts);
       setState(next);
       setForm(toForm(next.competition));
       setError(null);
@@ -189,6 +198,7 @@ function AdminCompetitionsPage() {
     }
   }
 
+  const currentRegistration = registrations.find(item => item.competition_id === state?.competition.id);
   const counts = useMemo(() => {
     const submissions = state?.submissions ?? [];
     return {
@@ -213,6 +223,12 @@ function AdminCompetitionsPage() {
       </div>
 
       <Section className="py-10">
+        {import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" && state.competition.category === "essay" && (
+          <div className="mb-5 grid gap-4 sm:grid-cols-2">
+            <Metric icon={Users} label="Registered entrants" value={currentRegistration?.registrations ?? 0} />
+            <Metric icon={FileText} label="Registered, essay not submitted" value={currentRegistration?.awaiting_essay ?? 0} />
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric icon={Users} label="Valid entries" value={counts.total} />
           <Metric icon={FileText} label="Awaiting review" value={counts.review} />

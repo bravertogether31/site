@@ -254,10 +254,13 @@ const admin={
         try{
           if(!Number.isSafeInteger(page)||page<1||perPage>1000||perPage<1)throw new Error("Invalid page");
           const r=await getNeonServerDatabasePool().query(
-            'SELECT id,email,"emailVerified" AS verified FROM neon_auth."user" ORDER BY email LIMIT $1 OFFSET $2',
+            `SELECT n.id,n.email,n."emailVerified" AS verified,
+              COALESCE((u.raw_user_meta_data->>'signup_completed')::boolean,true) AS signup_completed
+             FROM neon_auth."user" n LEFT JOIN auth.users u ON u.id=n.id
+             ORDER BY n.email LIMIT $1 OFFSET $2`,
             [perPage,(page-1)*perPage]
           );
-          return {data:{users:r.rows.map(x=>({...x,user_metadata:{signup_completed:true}}))},error:null};
+          return {data:{users:r.rows.map(x=>({...x,user_metadata:{signup_completed:x.signup_completed}}))},error:null};
         }catch(error){return {data:{users:[]},error:{message:(error as Error).message}}}
       }
     }
