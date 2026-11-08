@@ -42,10 +42,9 @@ authorized synthetic account before certifying the reset workflow.
    Supabase changes were reconciled. Keep Supabase unchanged for recovery.
 3. Production Neon Auth is using a shared development email sender; configure
    and validate an approved custom SMTP provider for real user deliverability.
-4. A synthetic, unverified test signup from a production email-delivery check
-   was removed from the native Neon directory but its mirrored legacy
-   `auth.users`/`profiles`/`user_roles` entries remain. Explicitly scoped
-   cleanup requires separate authorization and should be audited.
+4. The synthetic, unverified production test signup was fully cleaned up
+   after explicit user approval: legacy user, profile, and role rows are gone.
+   Readback confirms 12 original legacy and 12 native Neon identities remain.
 5. Positive email OTP code entry and successful password reset remain unproven
    by this identity-only backfill.
 
