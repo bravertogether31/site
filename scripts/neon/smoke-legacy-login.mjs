@@ -106,6 +106,15 @@ try{
  const forgery=await fetch(rest+"/messages",{method:"POST",headers:postHeaders,body:JSON.stringify({conversation_id:conversationId,sender_id:randomUUID(),sender_kind:"human",body:"Impersonation blocked"})});
  assert.ok(forgery.status===403||forgery.status===401,"Cross-user sender forgery was accepted");
  console.log("PASS signed-in member creates private conversation, sends message, cannot forge sender, no cross-account disclosure");
+ const apiHeaders={Authorization:"Bearer "+token,"Content-Type":"application/json",Prefer:"return=representation"};
+ const elevate=await fetch(rest+"/profiles?id=eq."+id,{method:"PATCH",headers:apiHeaders,body:JSON.stringify({is_advisor:true,is_public:true})});
+ const ownProfile=await readRls("profiles");
+ assert.equal(ownProfile[0].is_advisor,false,"Member escalated their advisor flag via Data API");
+ const assign=await fetch(rest+"/conversations?id=eq."+conversationId,{method:"PATCH",headers:apiHeaders,body:JSON.stringify({advisor_id:randomUUID()})});
+ const myConversations=await readRls("conversations");
+ assert.equal(myConversations.find(c=>c.id===conversationId).advisor_id,null,"Member reassigned a conversation via Data API");
+ console.log("PASS ordinary user cannot self-promote or reassign a private conversation");
+
 
  const accountResponse=await fetch(baseUrl+"/api/neon-account",{headers:{Cookie:sessionCookies}});
  assert.equal(accountResponse.status,200,"Account API must recognize Neon session cookie");
