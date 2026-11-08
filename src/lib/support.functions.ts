@@ -41,33 +41,10 @@ async function approvedAdvisorIds(candidateIds: string[]): Promise<Set<string>> 
 
 export const listPublicAdvisors = createServerFn({ method: "GET" }).handler(
   async () => {
-    const { getNeonPublicClient, publicNeonEnabled } = await import("@/integrations/neon/public.server");
+    const { publicNeonEnabled } = await import("@/integrations/neon/public.server");
     if (publicNeonEnabled()) {
-      // This recovery snapshot contains no linked, approved advisor accounts.
-      // Do not expose future linked accounts without independent role/approval
-      // verification (the original implementation uses server-only evidence).
-      const { data, error } = await getNeonPublicClient()
-        .from("public_advisors")
-        .select("id, linked_user_id, display_name, headline, bio, photo_url")
-        .eq("is_public", true)
-        .order("sort_order");
-      if (error) throw new Error("Advisor directory could not be loaded.");
-      if ((data ?? []).some((row) => row.linked_user_id)) {
-        throw new Error("Linked advisor verification is required before enabling this provider.");
-      }
-      return (data ?? []).map((d) => ({
-        id: d.id,
-        linked_user_id: null as string | null,
-        display_name: d.display_name,
-        headline: d.headline,
-        bio: d.bio,
-        photo_url: d.photo_url,
-        focus_areas: [] as string[],
-        calendly_url: null as string | null,
-        accepting_messages: false,
-        availability_status: "offline" as const,
-        last_seen_at: null as string | null,
-      }));
+      const { listNeonApprovedPublicAdvisors } = await import("@/integrations/neon/advisors.server");
+      return listNeonApprovedPublicAdvisors();
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
