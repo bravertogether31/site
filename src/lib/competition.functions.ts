@@ -386,6 +386,12 @@ export const getEssaySubmissionDownload = createServerFn({ method: "GET" })
     if (!submission || (!isAdmin && submission.user_id !== context.userId)) throw new Error("Submission not found.");
     if (!submission.file_path || !submission.original_filename) throw new Error("No verified essay file is attached.");
 
+    if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      const { documentExists } = await import("@/integrations/neon/storage.server");
+      if (!await documentExists(ESSAY_BUCKET, submission.file_path)) {
+        throw new Error("This archived essay file is not available in recovered storage. Please contact an administrator to restore it or request a replacement submission.");
+      }
+    }
     const { data: signed, error: signedError } = await supabaseAdmin.storage
       .from(ESSAY_BUCKET)
       .createSignedUrl(submission.file_path, 300, { download: submission.original_filename });

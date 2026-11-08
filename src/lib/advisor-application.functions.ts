@@ -418,6 +418,12 @@ export const getAdvisorCvDownload = createServerFn({ method: "GET" })
       throw new Error("No verified CV is attached to this application.");
     }
 
+    if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      const { documentExists } = await import("@/integrations/neon/storage.server");
+      if (!await documentExists(ADVISOR_CV_BUCKET, application.cv_file_path)) {
+        throw new Error("This archived CV is not available in recovered storage. Please ask the advisor to upload a replacement.");
+      }
+    }
     const { data: signed, error } = await supabaseAdmin.storage
       .from(ADVISOR_CV_BUCKET)
       .createSignedUrl(application.cv_file_path, 300, { download: application.cv_original_filename });
