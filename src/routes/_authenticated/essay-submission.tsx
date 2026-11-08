@@ -24,6 +24,7 @@ import {
   MAX_ESSAY_FILE_BYTES,
   finalizeEssayUpload,
   getEssayPortalState,
+  registerEssayEntrant,
   getEssaySubmissionDownload,
   prepareEssayUpload,
   withdrawEssaySubmission,
@@ -72,6 +73,7 @@ type ExistingSubmission = {
 
 type PortalState = {
   competition: Competition;
+  registration?: {participant_name:string;participant_age:number;country:string;school_name:string|null}|null;
   submission: ExistingSubmission | null;
   profileName: string;
   isAdmin: boolean;
@@ -135,11 +137,12 @@ function formatBytes(bytes: number | null) {
 
 function toForm(state: PortalState): FormState {
   const submission = state.submission;
+  const registration = state.registration;
   return {
-    participantName: submission?.participant_name || state.profileName,
-    participantAge: submission ? String(submission.participant_age) : "",
-    country: submission?.country || "",
-    schoolName: submission?.school_name || "",
+    participantName: submission?.participant_name || registration?.participant_name || state.profileName,
+    participantAge: submission ? String(submission.participant_age) : registration ? String(registration.participant_age) : "",
+    country: submission?.country || registration?.country || "",
+    schoolName: submission?.school_name || registration?.school_name || "",
     essayTitle: submission?.essay_title || "",
     declaredWordCount: submission ? String(submission.declared_word_count) : "",
     rulesAccepted: false,
@@ -150,6 +153,7 @@ function toForm(state: PortalState): FormState {
 function EssaySubmissionPage() {
   const { competition } = Route.useSearch();
   const getState = useServerFn(getEssayPortalState);
+  const registerEntrant = useServerFn(registerEssayEntrant);
   const prepareUpload = useServerFn(prepareEssayUpload);
   const finalizeUpload = useServerFn(finalizeEssayUpload);
   const getDownload = useServerFn(getEssaySubmissionDownload);
@@ -158,6 +162,9 @@ function EssaySubmissionPage() {
   const dragDepth = useRef(0);
 
   const [state, setState] = useState<PortalState | null>(null);
+  const neonMode = import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon";
+  const [step, setStep] = useState<1|2>(neonMode ? 1 : 2);
+  const [registering, setRegistering] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -177,6 +184,7 @@ function EssaySubmissionPage() {
       const next = result as PortalState;
       setState(next);
       setForm(toForm(next));
+      setStep(neonMode && !next.registration && !next.submission ? 1 : 2);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "The submission portal could not be loaded.");
     } finally {
@@ -229,6 +237,40 @@ function EssaySubmissionPage() {
     setFile(null);
     setFileError(null);
     if (inputRef.current) inputRef.current.value = "";
+  }
+
+  async function saveRegistration(event: React.FormEvent) {
+    event.preventDefault();
+    if (!state || registering || !neonMode) return;
+    if (!form.country || !form.participantAge || !Number.isInteger(Number(form.participantAge))) {
+      toast.error("Enter your age and select your country or territory.");
+      return;
+    }
+    setRegistering(true);
+    try {
+      await registerEntrant({ data: {
+        competitionId: state.competition.id,
+        participantName: form.participantName,
+        participantAge: Number(form.participantAge),
+        country: form.country,
+        schoolName: form.schoolName,
+      } });
+      setState(current => current ? {
+        ...current,
+        registration: {
+          participant_name: form.participantName,
+          participant_age: Number(form.participantAge),
+          country: form.country,
+          school_name: form.schoolName || null,
+        },
+      } : current);
+      setStep(2);
+      toast.success("Registration saved. You may upload your essay now or return later.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Registration could not be saved.");
+    } finally {
+      setRegistering(false);
+    }
   }
 
   async function submit(event: React.FormEvent) {
@@ -382,14 +424,15 @@ function EssaySubmissionPage() {
         )}
 
         {canSubmit ? (
-          <form onSubmit={submit} className="mt-8">
+          <form onSubmit={neonMode && step === 1 ? saveRegistration : submit} className="mt-8">
             <div className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-border bg-card p-6 shadow-card sm:p-8">
               <div>
-                <div className="text-xs font-bold uppercase tracking-widest text-teal">Entrant details</div>
-                <h2 className="mt-2 text-2xl font-bold">{state.submission ? "Replace or update your entry" : "Create your entry"}</h2>
+                <div className="text-xs font-bold uppercase tracking-widest text-teal">{neonMode ? `Step ${step} of 2` : "Entrant details"}</div>
+                <h2 className="mt-2 text-2xl font-bold">{neonMode ? (step === 1 ? "Register for the competition" : "Submit your essay") : state.submission ? "Replace or update your entry" : "Create your entry"}</h2>
+                {neonMode && <p className="mt-2 text-sm text-muted-foreground">{step === 1 ? "Your details are saved as a registration even if you submit your essay later." : "Your registration is saved. Upload and submit your essay to complete your entry."}</p>}
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              {(step === 1 || !neonMode) && <div className="grid gap-5 sm:grid-cols-2">
                 <Field
                   label="Participant name"
                   value={form.participantName}
@@ -417,8 +460,23 @@ function EssaySubmissionPage() {
                   onChange={(value) => setForm((current) => ({ ...current, schoolName: value }))}
                   maxLength={160}
                 />
-              </div>
+              </div>}
 
+              {neonMode && step === 1 && (
+                <button type="submit" disabled={registering || !form.country || !form.participantAge || !form.participantName}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-mesh px-6 py-3.5 font-semibold text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50">
+                  {registering && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {registering ? "Saving your registration…" : "Register and continue to essay upload"}
+                </button>
+              )}
+
+              {(!neonMode || step === 2) && <>
+              {neonMode && (
+                <button type="button" disabled={busy} onClick={() => setStep(1)}
+                  className="rounded-full border border-border px-4 py-2 text-sm font-semibold hover:border-teal/50">
+                  Edit registration details
+                </button>
+              )}
               <div className="grid gap-5 sm:grid-cols-[1fr_180px]">
                 <Field
                   label="Essay title"
@@ -527,6 +585,7 @@ function EssaySubmissionPage() {
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 {stageLabel(stage, Boolean(state.submission))}
               </button>
+              </>}
             </div>
           </form>
         ) : state.isStudent ? (

@@ -24,10 +24,30 @@ function convertUser(user:Identity|null|undefined,signupCompleted=true):User|nul
   } as User;
 }
 let cachedIdentity:Promise<User|null>|null=null;
+let identityCachedAt=0;
 let tokenPromise:Promise<string|null>|null=null;
+let cachedBearer:{value:string;until:number}|null=null;
+let invalidationInstalled=false;
+const IDENTITY_TTL_MS=10_000;
+const BEARER_TTL_MS=15_000;
+
+function invalidateAuthCache(){
+  cachedIdentity=null;
+  identityCachedAt=0;
+  cachedBearer=null;
+  tokenPromise=null;
+}
+function installInvalidation(){
+  if(typeof window!=="undefined" && !invalidationInstalled){
+    window.addEventListener("braver-neon-auth-change",invalidateAuthCache);
+    invalidationInstalled=true;
+  }
+}
 
 async function currentUser(fresh=false):Promise<User|null> {
-  if (!cachedIdentity || fresh) {
+  installInvalidation();
+  if (!cachedIdentity || fresh || Date.now()-identityCachedAt>IDENTITY_TTL_MS) {
+    identityCachedAt=Date.now();
     cachedIdentity=fetch("/api/neon-auth/get-session",{credentials:"same-origin",cache:"no-store"})
       .then(async res=> {
         if(!res.ok)return null;
@@ -44,25 +64,34 @@ async function currentUser(fresh=false):Promise<User|null> {
   return cachedIdentity;
 }
 async function bearer():Promise<string|null>{
+  installInvalidation();
+  if(cachedBearer && cachedBearer.until>Date.now()) return cachedBearer.value;
   if(!tokenPromise){
     tokenPromise=fetch("/api/neon-auth/token",{credentials:"same-origin",cache:"no-store"})
       .then(async res=>{
         if(!res.ok)return null;
         const data=await res.json();
         const token=data?.token??data?.data?.token;
-        return typeof token==="string"&&token.split(".").length===3?token:null;
+        if(typeof token!=="string"||token.split(".").length!==3)return null;
+        let until=Date.now()+BEARER_TTL_MS;
+        try {
+          const claims=JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+          if(typeof claims?.exp==="number")until=Math.min(until,claims.exp*1000-30_000);
+        }catch{return null;}
+        if(until>Date.now())cachedBearer={value:token,until};
+        return token;
       }).catch(()=>null).finally(()=>{tokenPromise=null});
   }
   return tokenPromise;
 }
 function authChange(){
-  cachedIdentity=null;
+  invalidateAuthCache();
   if(typeof window!=="undefined")window.dispatchEvent(new Event("braver-neon-auth-change"));
 }
 const auth = {
-  async getUser(){return {data:{user:await currentUser(true)},error:null};},
+  async getUser(){return {data:{user:await currentUser()},error:null};},
   async getSession(){
-    const user=await currentUser(true);
+    const user=await currentUser();
     return {data:{session:user?{user,access_token:await bearer()}:null},error:null};
   },
   async signOut(){
@@ -104,7 +133,9 @@ export function getNeonBrowserClient(){
         if(!token)throw new Error("Please sign in again.");
         const headers=new Headers(init?.headers);
         headers.set("Authorization","Bearer "+token);
-        return fetch(input,{...init,headers,redirect:"error"});
+        const response=await fetch(input,{...init,headers,redirect:"error"});
+        if(response.status===401)cachedBearer=null;
+        return response;
       },
     });
     client={from:table=>db.from(table),auth};

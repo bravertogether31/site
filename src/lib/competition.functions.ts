@@ -142,11 +142,22 @@ async function selectedCompetition(slug?: string, includeDraft = false) {
   return data;
 }
 
+const PUBLIC_COMPETITIONS_CACHE_MS = 15_000;
+// Only published, non-personal competition records are cached.
+let publishedCompetitionCache: {
+  expires: number;
+  rows: import("@/lib/competition-database.types").CompetitionDatabase["public"]["Tables"]["competitions"]["Row"][];
+} | undefined;
+
 export const listPublicCompetitions = createServerFn({ method: "GET" }).handler(async () => {
   const { getNeonPublicClient, publicNeonEnabled } = await import("@/integrations/neon/public.server");
+  const usingNeon = publicNeonEnabled();
+  if (usingNeon && publishedCompetitionCache && publishedCompetitionCache.expires > Date.now()) {
+    return publishedCompetitionCache.rows.map(c => ({ ...c, acceptingSubmissions: competitionIsOpen(c) }));
+  }
   let data: import("@/lib/competition-database.types").CompetitionDatabase["public"]["Tables"]["competitions"]["Row"][] | null = null;
   let error: { message: string } | null = null;
-  if (publicNeonEnabled()) {
+  if (usingNeon) {
     const result = await getNeonPublicClient().from("competitions").select("*").eq("is_public", true).neq("status", "draft").order("opens_at", { ascending: false });
     data = result.data as typeof data;
     error = result.error;
@@ -157,6 +168,9 @@ export const listPublicCompetitions = createServerFn({ method: "GET" }).handler(
     error = result.error;
   }
   if (error) throw new Error("Competitions could not be loaded. Please try again.");
+  if (usingNeon) publishedCompetitionCache = {
+    expires: Date.now() + PUBLIC_COMPETITIONS_CACHE_MS, rows: data ?? [],
+  };
   return (data ?? []).map(c => ({ ...c, acceptingSubmissions: competitionIsOpen(c) }));
 });
 export const getPublicCompetition = createServerFn({ method: "GET" })
@@ -164,6 +178,72 @@ export const getPublicCompetition = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const competition = await selectedCompetition(data.slug);
     return { ...competition, acceptingSubmissions: competitionIsOpen(competition) };
+  });
+
+// A registration is saved before the essay file exists. It is NOT a submission.
+const ContestRegistrationInput = z.object({
+  competitionId: z.string().uuid(),
+  participantName: z.string().trim().min(2).max(100),
+  participantAge: z.number().int().min(0).max(120),
+  country: z.string().trim().min(2).max(100),
+  schoolName: z.string().trim().max(160).optional().default(""),
+});
+
+export const registerEssayEntrant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((value: unknown) => ContestRegistrationInput.parse(value))
+  .handler(async ({ data, context }) => {
+    if (process.env.BRAVER_AUTH_PROVIDER !== "neon") {
+      throw new Error("Two-step registration is unavailable for the legacy provider.");
+    }
+    const supabaseAdmin = await requireStudent(context.userId);
+    const { data: competition, error } = await supabaseAdmin.from("competitions")
+      .select("id,category,status,is_public,opens_at,closes_at,minimum_age,maximum_age")
+      .eq("id", data.competitionId).maybeSingle();
+    if (error || !competition || !competition.is_public || competition.category !== "essay"
+      || !competitionIsOpen(competition)) {
+      throw new Error("This essay competition is not accepting registrations.");
+    }
+    if (data.participantAge < (competition.minimum_age ?? 0)
+      || data.participantAge > competition.maximum_age) {
+      throw new Error("Your age does not meet the competition eligibility requirements.");
+    }
+    const { getNeonServerDatabasePool } = await import("@/integrations/neon/legacy-login.server");
+    await getNeonServerDatabasePool().query(
+      `INSERT INTO public.competition_registrations
+        (competition_id,user_id,participant_name,participant_age,country,school_name)
+       VALUES($1::uuid,$2::uuid,$3,$4,$5,$6)
+       ON CONFLICT(competition_id,user_id) DO UPDATE SET
+        participant_name=EXCLUDED.participant_name,
+        participant_age=EXCLUDED.participant_age,
+        country=EXCLUDED.country,
+        school_name=EXCLUDED.school_name,
+        updated_at=now()`,
+      [data.competitionId,context.userId,data.participantName,data.participantAge,data.country,data.schoolName || null],
+    );
+    return { registered: true as const };
+  });
+
+export const getEssayRegistrationCounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context.userId);
+    if (process.env.BRAVER_AUTH_PROVIDER !== "neon") return [];
+    const { getNeonServerDatabasePool } = await import("@/integrations/neon/legacy-login.server");
+    const { rows } = await getNeonServerDatabasePool().query<{
+      competition_id: string; title: string; registrations: number;
+      submitted_essays: number; awaiting_essay: number;
+    }>(`SELECT c.id AS competition_id,c.title,
+       (SELECT count(*)::integer FROM public.competition_registrations r WHERE r.competition_id=c.id) AS registrations,
+       (SELECT count(*)::integer FROM public.essay_submissions s WHERE s.competition_id=c.id
+          AND s.status NOT IN ('draft','withdrawn')) AS submitted_essays,
+       (SELECT count(*)::integer FROM public.competition_registrations r
+         WHERE r.competition_id=c.id AND NOT EXISTS
+           (SELECT 1 FROM public.essay_submissions s
+             WHERE s.competition_id=r.competition_id AND s.user_id=r.user_id
+               AND s.status NOT IN ('draft','withdrawn'))) AS awaiting_essay
+     FROM public.competitions c WHERE c.category='essay' ORDER BY c.opens_at DESC`);
+    return rows;
   });
 
 export const getEssayPortalState = createServerFn({ method: "GET" })
@@ -186,8 +266,21 @@ export const getEssayPortalState = createServerFn({ method: "GET" })
     ]);
     if (submissionError) throw new Error(submissionError.message);
 
+    let registration: {participant_name:string;participant_age:number;country:string;school_name:string|null}|null = null;
+    if (isStudent && process.env.BRAVER_AUTH_PROVIDER === "neon") {
+      const { getNeonServerDatabasePool } = await import("@/integrations/neon/legacy-login.server");
+      const { rows } = await getNeonServerDatabasePool().query<{participant_name:string;participant_age:number;country:string;school_name:string|null}>(
+        `SELECT participant_name,participant_age,country,school_name
+         FROM public.competition_registrations
+         WHERE competition_id=$1::uuid AND user_id=$2::uuid LIMIT 1`,
+        [competition.id, context.userId],
+      );
+      registration = rows[0] ?? null;
+    }
+
     return {
       competition: { ...competition, acceptingSubmissions: competitionIsOpen(competition) },
+      registration,
       submission,
       profileName: profile?.display_name ?? "",
       isAdmin,

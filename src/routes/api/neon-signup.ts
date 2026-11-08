@@ -32,6 +32,20 @@ async function throttle(email:string){
  const result=await (await pool()).query<{attempts:number}>(sql,[digest]);
  return Number(result.rows[0]?.attempts??999)<=6;
 }
+/** Never send signup verification to a completed or unknown account. */
+async function signupState(email:string):Promise<"new"|"pending"|"completed">{
+ const result=await (await pool()).query<{
+  legacy_exists:boolean; legacy_completed:boolean|null; native_exists:boolean;
+ }>(`SELECT
+   EXISTS(SELECT 1 FROM auth.users WHERE lower(email)=$1) AS legacy_exists,
+   (SELECT COALESCE((raw_user_meta_data->>'signup_completed')::boolean,true)
+    FROM auth.users WHERE lower(email)=$1 LIMIT 1) AS legacy_completed,
+   EXISTS(SELECT 1 FROM neon_auth."user" WHERE lower(email)=$1) AS native_exists`,[email]);
+ const row=result.rows[0];
+ if(row.legacy_exists && row.legacy_completed===false)return "pending";
+ if(row.legacy_exists || row.native_exists)return "completed";
+ return "new";
+}
 async function native(){
  const {createAuthClient}=await import("@neondatabase/auth");
  const {BetterAuthVanillaAdapter}=await import("@neondatabase/auth/vanilla/adapters");
@@ -89,7 +103,14 @@ export const Route=createFileRoute("/api/neon-signup")({server:{handlers:{
    const data=start.parse(input);
    try{
     if(!await throttle(data.email))return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
+    const state=await signupState(data.email);
+    if(state==="completed")return Response.json({error:"An account already exists for this email. Please sign in or reset your password."},{status:409,headers});
     const auth=await native();
+    if(state==="pending"){
+      const pending=await auth.emailOtp.sendVerificationOtp({email:data.email,type:"email-verification"});
+      if(pending.error)return Response.json({error:"Could not resend the verification code."},{status:400,headers});
+      return Response.json({ok:true},{headers});
+    }
     const password=randomBytes(48).toString("base64url");
     const response=await auth.signUp.email({email:data.email,name:data.fullName,password});
     if(response.error)return Response.json({error:"Could not send a verification code. If you already have an account, sign in instead."},{status:400,headers});
@@ -100,6 +121,9 @@ export const Route=createFileRoute("/api/neon-signup")({server:{handlers:{
    const data=resend.parse(input);
    try{
     if(!await throttle(data.email))return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
+    if(await signupState(data.email)!=="pending"){
+      return Response.json({error:"A pending signup was not found. Please sign in or start registration again."},{status:409,headers});
+    }
     const auth=await native();
     const result=await auth.emailOtp.sendVerificationOtp({email:data.email,type:"email-verification"});
     if(result.error)return Response.json({error:"Unable to resend code."},{status:400,headers});
