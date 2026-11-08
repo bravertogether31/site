@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { AdvisorIntentTrigger } from "@/components/AdvisorIntentDialog";
-import { NeonAuthPanel } from "@/components/NeonAuthPanel";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 import { Eyebrow, Section, SiteLayout } from "@/components/SiteLayout";
 import {
@@ -61,7 +60,7 @@ export const Route = createFileRoute("/auth")({
       },
     ],
   }),
-  component: import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? NeonAuthPanel : AuthPage,
+  component: AuthPage,
 });
 
 function readSignupDraft(): SignupDraft | null {
@@ -180,7 +179,9 @@ function AuthPage() {
 
           const { data, error } = await supabase.auth.getSession();
           if (cancelled) return;
-          if (error || !data.session?.user) {
+          const hasNeonResetToken = import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon"
+            && Boolean(new URLSearchParams(window.location.search).get("token"));
+          if (!hasNeonResetToken && (error || !data.session?.user)) {
             setRecoveryStep("request");
             setInlineMessage(
               "This password reset link is invalid or has expired. Request a new reset email below.",
@@ -324,6 +325,17 @@ function AuthPage() {
     setInlineMessage(null);
 
     try {
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const response = await fetch("/api/neon-signup",{
+          method:"POST",credentials:"same-origin",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"start",email:normalizedEmail,fullName:normalizedName,agreed}),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "The verification code could not be sent.");
+        }
+      } else {
       const { error } = await supabase.auth.signInWithOtp({
         email: normalizedEmail,
         options: {
@@ -337,6 +349,7 @@ function AuthPage() {
         },
       });
       if (error) throw error;
+      }
 
       setEmail(normalizedEmail);
       setFullName(normalizedName);
@@ -369,12 +382,23 @@ function AuthPage() {
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: normalizedEmail,
-        token: otp,
-        type: "email",
-      });
-      if (error) throw error;
+      let data: {user: {id:string,email?:string,user_metadata?:Record<string,unknown>}|null,session:unknown} = {user:null,session:null};
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const response = await fetch("/api/neon-auth/email-otp/verify-email", {
+          method:"POST",credentials:"same-origin",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({email:normalizedEmail,otp}),
+        });
+        if (!response.ok) throw new Error("The verification code is invalid or has expired.");
+        const verified = await supabase.auth.getSession();
+        data = {user:verified.data.session?.user ?? null,session:verified.data.session};
+      } else {
+        const result = await supabase.auth.verifyOtp({
+          email: normalizedEmail, token: otp, type: "email",
+        });
+        if (result.error) throw result.error;
+        data = result.data;
+      }
       if (!data.user || !data.session) {
         throw new Error("Email verification did not create a session.");
       }
@@ -397,11 +421,9 @@ function AuthPage() {
         return;
       }
 
-      const verifiedName =
-        fullName.trim() ||
-        data.user.user_metadata?.full_name ||
-        data.user.user_metadata?.display_name ||
-        "";
+      const verifiedName = fullName.trim() ||
+        (typeof data.user.user_metadata?.full_name === "string" ? data.user.user_metadata.full_name : "") ||
+        (typeof data.user.user_metadata?.display_name === "string" ? data.user.user_metadata.display_name : "");
 
       setFullName(verifiedName);
       setSignupStep("password");
@@ -428,6 +450,13 @@ function AuthPage() {
     setInlineMessage(null);
 
     try {
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const response = await fetch("/api/neon-signup",{
+          method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"resend",email:email.trim().toLowerCase()}),
+        });
+        if(!response.ok)throw new Error("A new verification code could not be sent.");
+      } else {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
         options: {
@@ -441,6 +470,7 @@ function AuthPage() {
         },
       });
       if (error) throw error;
+      }
 
       setResendSeconds(RESEND_DELAY_SECONDS);
       setInlineMessage(
@@ -487,6 +517,19 @@ function AuthPage() {
         throw new Error(
           "Your verified signup session is no longer valid. Please verify your email again.",
         );
+      }
+
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const response = await fetch("/api/neon-signup",{
+          method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"complete",password,fullName:fullName.trim()}),
+        });
+        if (!response.ok) throw new Error("Your password could not be saved. Please retry.");
+        clearSignupDraft();
+        window.dispatchEvent(new Event("braver-neon-auth-change"));
+        toast.success("Member account created");
+        await continueAfterAuth();
+        return;
       }
 
       const { data, error } = await supabase.auth.updateUser({
@@ -617,6 +660,26 @@ function AuthPage() {
     setInlineMessage(null);
 
     try {
+      if (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon") {
+        const token = new URLSearchParams(window.location.search).get("token");
+        if (!token || token.length > 4096) throw new Error("The password reset link is invalid. Request a new email.");
+        const response = await fetch("/api/neon-auth/reset-password",{
+          method:"POST",credentials:"same-origin",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({token,newPassword:password}),
+        });
+        if (!response.ok) throw new Error("The password reset link has expired. Request a new email.");
+        await supabase.auth.signOut();
+        setRecoveryStep("none");
+        setPassword("");
+        setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
+        toast.success("Password updated");
+        setInlineMessage("Your password has been updated. Sign in with your new password.");
+        await navigate({to:"/auth",search:{mode:"signin",recovery:undefined},replace:true});
+        return;
+      }
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session?.user) {
         throw new Error(

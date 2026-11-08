@@ -27,6 +27,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$slug'
 import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
+import { Route as ApiNeonSignupRouteImport } from './routes/api/neon-signup'
 import { Route as ApiNeonLegacyLoginRouteImport } from './routes/api/neon-legacy-login'
 import { Route as ApiNeonAccountRouteImport } from './routes/api/neon-account'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -128,6 +129,11 @@ const ApiSignupEmailCheckRoute = ApiSignupEmailCheckRouteImport.update({
   path: '/api/signup-email-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNeonSignupRoute = ApiNeonSignupRouteImport.update({
+  id: '/api/neon-signup',
+  path: '/api/neon-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNeonLegacyLoginRoute = ApiNeonLegacyLoginRouteImport.update({
   id: '/api/neon-legacy-login',
   path: '/api/neon-legacy-login',
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
+  '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
+  '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
+  '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
   '/competitions_/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/neon-account'
     | '/api/neon-legacy-login'
+    | '/api/neon-signup'
     | '/api/signup-email-check'
     | '/competitions/$slug'
     | '/api/neon-auth/$'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/neon-account'
     | '/api/neon-legacy-login'
+    | '/api/neon-signup'
     | '/api/signup-email-check'
     | '/competitions/$slug'
     | '/api/neon-auth/$'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/api/neon-account'
     | '/api/neon-legacy-login'
+    | '/api/neon-signup'
     | '/api/signup-email-check'
     | '/competitions_/$slug'
     | '/api/neon-auth/$'
@@ -394,6 +406,7 @@ export interface RootRouteChildren {
   TeamRoute: typeof TeamRoute
   ApiNeonAccountRoute: typeof ApiNeonAccountRoute
   ApiNeonLegacyLoginRoute: typeof ApiNeonLegacyLoginRoute
+  ApiNeonSignupRoute: typeof ApiNeonSignupRoute
   ApiSignupEmailCheckRoute: typeof ApiSignupEmailCheckRoute
   CompetitionsSlugRoute: typeof CompetitionsSlugRoute
   ApiNeonAuthSplatRoute: typeof ApiNeonAuthSplatRoute
@@ -527,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSignupEmailCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/neon-signup': {
+      id: '/api/neon-signup'
+      path: '/api/neon-signup'
+      fullPath: '/api/neon-signup'
+      preLoaderRoute: typeof ApiNeonSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/neon-legacy-login': {
       id: '/api/neon-legacy-login'
       path: '/api/neon-legacy-login'
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeamRoute: TeamRoute,
   ApiNeonAccountRoute: ApiNeonAccountRoute,
   ApiNeonLegacyLoginRoute: ApiNeonLegacyLoginRoute,
+  ApiNeonSignupRoute: ApiNeonSignupRoute,
   ApiSignupEmailCheckRoute: ApiSignupEmailCheckRoute,
   CompetitionsSlugRoute: CompetitionsSlugRoute,
   ApiNeonAuthSplatRoute: ApiNeonAuthSplatRoute,

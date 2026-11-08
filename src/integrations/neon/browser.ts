@@ -15,12 +15,12 @@ function dataApiUrl(): string {
 }
 
 type Identity = {id:string;email:string;name?:string;createdAt?:string;emailVerified?:boolean};
-function convertUser(user:Identity|null|undefined):User|null {
+function convertUser(user:Identity|null|undefined,signupCompleted=true):User|null {
   if (!user?.id || !user.email || user.emailVerified !== true) return null;
   return {
     id:user.id, email:user.email,
     aud:"authenticated",created_at:user.createdAt||"",
-    app_metadata:{},user_metadata:{full_name:user.name||"",signup_completed:true},
+    app_metadata:{},user_metadata:{full_name:user.name||"",signup_completed:signupCompleted},
   } as User;
 }
 let cachedIdentity:Promise<User|null>|null=null;
@@ -32,7 +32,13 @@ async function currentUser(fresh=false):Promise<User|null> {
       .then(async res=> {
         if(!res.ok)return null;
         const json=await res.json();
-        return convertUser(json?.user);
+        if(!json?.user?.emailVerified)return null;
+        let completed=true;
+        try{
+          const state=await fetch("/api/neon-signup",{credentials:"same-origin",cache:"no-store"});
+          if(state.ok){const item=await state.json();completed=item?.signup_completed===true;}
+        }catch{ /* Missing status is not proof of a completed signup. */ completed=false; }
+        return convertUser(json?.user,completed);
       }).catch(()=>null);
   }
   return cachedIdentity;
