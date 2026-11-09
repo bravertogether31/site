@@ -102,8 +102,10 @@ export const Route=createFileRoute("/api/neon-signup")({server:{handlers:{
   if(start.safeParse(input).success){
    const data=start.parse(input);
    try{
-    if(!await throttle(data.email))return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
-    const state=await signupState(data.email);
+    // The rate-limit write and existing-account lookup are independent.
+    // Run them concurrently to avoid two sequential Oregon-to-Singapore RTTs.
+    const [allowed,state]=await Promise.all([throttle(data.email),signupState(data.email)]);
+    if(!allowed)return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
     if(state==="completed")return Response.json({error:"An account already exists for this email. Please sign in or reset your password."},{status:409,headers});
     const auth=await native();
     if(state==="pending"){
@@ -120,8 +122,9 @@ export const Route=createFileRoute("/api/neon-signup")({server:{handlers:{
   if(resend.safeParse(input).success){
    const data=resend.parse(input);
    try{
-    if(!await throttle(data.email))return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
-    if(await signupState(data.email)!=="pending"){
+    const [allowed,state]=await Promise.all([throttle(data.email),signupState(data.email)]);
+    if(!allowed)return Response.json({error:"Too many attempts. Try again later."},{status:429,headers});
+    if(state!=="pending"){
       return Response.json({error:"A pending signup was not found. Please sign in or start registration again."},{status:409,headers});
     }
     const auth=await native();
