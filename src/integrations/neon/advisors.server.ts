@@ -23,7 +23,11 @@ export type PublicNeonAdvisor = {
   last_seen_at: string | null;
 };
 
-export async function listNeonApprovedPublicAdvisors(): Promise<PublicNeonAdvisor[]> {
+const UNLINKED_CACHE_MS = 15_000;
+let unlinkedCache: { expiresAt: number; rows: PublicNeonAdvisor[] } | undefined;
+let inFlight: Promise<PublicNeonAdvisor[]> | undefined;
+
+async function queryPublicNeonAdvisors(): Promise<PublicNeonAdvisor[]> {
   const { rows } = await getNeonServerDatabasePool().query<PublicNeonAdvisor>(`
     WITH approved AS (
       SELECT p.id, p.display_name, p.headline, p.bio, p.focus_areas,
@@ -90,5 +94,23 @@ export async function listNeonApprovedPublicAdvisors(): Promise<PublicNeonAdviso
     FROM cards
     ORDER BY source_rank,sort_order,display_name
   `);
+  // Cache only informational/unlinked cards. A currently contactable advisor
+  // is never cached so withdrawing their profile/message consent is reflected
+  // on the very next request; all contact actions also reauthorize server-side.
+  if (rows.every((advisor) => !advisor.linked_user_id && !advisor.accepting_messages)) {
+    unlinkedCache = { expiresAt: Date.now() + UNLINKED_CACHE_MS, rows };
+  } else {
+    unlinkedCache = undefined;
+  }
   return rows;
+}
+
+export function listNeonApprovedPublicAdvisors(): Promise<PublicNeonAdvisor[]> {
+  if (unlinkedCache && unlinkedCache.expiresAt > Date.now()) {
+    return Promise.resolve(unlinkedCache.rows);
+  }
+  if (!inFlight) {
+    inFlight = queryPublicNeonAdvisors().finally(() => { inFlight = undefined; });
+  }
+  return inFlight;
 }
