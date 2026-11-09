@@ -112,5 +112,17 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
+  },
+  "overrides": {
+    "@neondatabase/auth": {
+      "better-auth": "1.7.18",
+      "@better-auth/core": "1.7.18",
+      "@better-auth/oauth-provider": "1.7.18",
+      "@better-auth/drizzle-adapter": "1.7.18",
+      "zod": "4.6.7"
+    },
+    "@neondatabase/neon-js": {
+      "zod": "4.6.7"
+    }
   }
 }

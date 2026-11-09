@@ -51,7 +51,13 @@ async function native(){
  const {BetterAuthVanillaAdapter}=await import("@neondatabase/auth/vanilla/adapters");
  const url=process.env.NEON_AUTH_BASE_URL||"",origin=process.env.BRAVER_SITE_ORIGIN||"";
  if(!url.startsWith("https://") || !new URL(url).hostname.endsWith(".neon.tech"))throw Error("Auth endpoint unavailable");
- return createAuthClient(url,{adapter:BetterAuthVanillaAdapter({fetchOptions:{headers:{Origin:origin}}})});
+ const client=createAuthClient(url,{adapter:BetterAuthVanillaAdapter({fetchOptions:{headers:{Origin:origin}}})});
+ // Neon registers emailOtp at runtime; the patched Better Auth types no longer infer it.
+ const withOtp=client as typeof client & {
+   emailOtp:{sendVerificationOtp(input:{email:string;type:"email-verification"}):Promise<{error:unknown|null}>};
+ };
+ if(typeof withOtp.emailOtp?.sendVerificationOtp!=="function")throw Error("Verification code delivery is unavailable");
+ return withOtp;
 }
 async function status(){
  const {requireNeonAccountSession}=await import("@/integrations/neon/auth.server");
