@@ -4,51 +4,244 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+
   <style>
     body, table, td, p, a {
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     }
+
     h1 {
       font-family: "Space Grotesk", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     }
+
     @media only screen and (max-width: 620px) {
-      .shell { width: 100% !important; }
-      .outer { padding: 28px 16px !important; }
-      .card { padding: 28px 22px !important; }
-      .code { font-size: 31px !important; letter-spacing: 7px !important; }
+      .shell {
+        width: 100% !important;
+      }
+
+      .outer {
+        padding: 28px 16px !important;
+      }
+
+      .card {
+        padding: 28px 22px !important;
+      }
+
+      .code {
+        font-size: 31px !important;
+        letter-spacing: 7px !important;
+      }
     }
   </style>
 </head>
-<body style="margin:0; padding:0; background:#eef9fb; color:#001c38;">
-  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+
+<body style="
+  margin:0;
+  padding:0;
+  background:#eef9fb;
+  color:#001c38;
+">
+
+  <div style="
+    display:none;
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    color:transparent;
+  ">
     Your BraverTogether verification code is {{OTP_CODE}}.
   </div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-    style="width:100%; background-color:#eef9fb; background-image: radial-gradient(circle at 15% 10%, rgba(189,232,244,0.75), transparent 35%), radial-gradient(circle at 90% 90%, rgba(198,242,244,0.9), transparent 36%);">
-    <tr><td class="outer" align="center" style="padding:48px 24px;">
-      <table role="presentation" class="shell" width="540" cellspacing="0" cellpadding="0" border="0" style="width:540px; max-width:540px;">
-        <tr><td class="card" style="background:#ffffff; border:1px solid #d9e8eb; border-radius:18px; padding:40px; box-shadow:0 14px 40px rgba(0,28,56,0.08);">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
-            <td style="background:#e7f7f8; color:#007f87; border-radius:999px; padding:7px 11px; font-size:10px; line-height:12px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;">Email verification</td>
-          </tr></table>
-          <h1 style="margin:22px 0 0; color:#001c38; font-size:34px; line-height:40px; font-weight:700; letter-spacing:-0.9px;">Verify your email</h1>
-          <p style="margin:12px 0 0; color:#526979; font-size:15px; line-height:24px;">Enter the six-digit code below to continue creating your BraverTogether account.</p>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:28px;"><tr>
-            <td align="center" style="background:#f1fafb; border:1px solid #d7e9ec; border-radius:15px; padding:25px 18px;">
-              <div style="color:#617786; font-size:10px; line-height:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:11px;">Verification code</div>
-              <div class="code" style="color:#001c38; font-family:'Space Grotesk',Inter,Arial,sans-serif; font-size:36px; line-height:44px; font-weight:700; letter-spacing:10px; white-space:nowrap;">{{OTP_CODE}}</div>
+
+  <table
+    role="presentation"
+    width="100%"
+    cellspacing="0"
+    cellpadding="0"
+    border="0"
+    style="
+      width:100%;
+      background-color:#eef9fb;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(189,232,244,0.75), transparent 35%),
+        radial-gradient(circle at 90% 90%, rgba(198,242,244,0.9), transparent 36%);
+    "
+  >
+    <tr>
+      <td class="outer" align="center" style="padding:48px 24px;">
+
+        <table
+          role="presentation"
+          class="shell"
+          width="540"
+          cellspacing="0"
+          cellpadding="0"
+          border="0"
+          style="width:540px;max-width:540px;"
+        >
+          <tr>
+            <td
+              class="card"
+              style="
+                background:#ffffff;
+                border:1px solid #d9e8eb;
+                border-radius:18px;
+                padding:40px;
+                box-shadow:0 14px 40px rgba(0,28,56,0.08);
+              "
+            >
+
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="
+                    background:#e7f7f8;
+                    color:#007f87;
+                    border-radius:999px;
+                    padding:7px 11px;
+                    font-size:10px;
+                    line-height:12px;
+                    font-weight:700;
+                    letter-spacing:1.4px;
+                    text-transform:uppercase;
+                  ">
+                    Email verification
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="
+                margin:22px 0 0;
+                color:#001c38;
+                font-size:34px;
+                line-height:40px;
+                font-weight:700;
+                letter-spacing:-0.9px;
+              ">
+                Verify your email
+              </h1>
+
+              <p style="
+                margin:12px 0 0;
+                color:#526979;
+                font-size:15px;
+                line-height:24px;
+              ">
+                Enter the six-digit code below to continue creating your BraverTogether account.
+              </p>
+
+              <table
+                role="presentation"
+                width="100%"
+                cellspacing="0"
+                cellpadding="0"
+                border="0"
+                style="margin-top:28px;"
+              >
+                <tr>
+                  <td
+                    align="center"
+                    style="
+                      background:#f1fafb;
+                      border:1px solid #d7e9ec;
+                      border-radius:15px;
+                      padding:25px 18px;
+                    "
+                  >
+
+                    <div style="
+                      color:#617786;
+                      font-size:10px;
+                      line-height:12px;
+                      font-weight:700;
+                      letter-spacing:1.5px;
+                      text-transform:uppercase;
+                      margin-bottom:11px;
+                    ">
+                      Verification code
+                    </div>
+
+                    <div
+                      class="code"
+                      style="
+                        color:#001c38;
+                        font-family:'Space Grotesk',Inter,Arial,sans-serif;
+                        font-size:36px;
+                        line-height:44px;
+                        font-weight:700;
+                        letter-spacing:10px;
+                        white-space:nowrap;
+                      "
+                    >
+                      {{OTP_CODE}}
+                    </div>
+
+                  </td>
+                </tr>
+              </table>
+
+              <table
+                role="presentation"
+                width="100%"
+                cellspacing="0"
+                cellpadding="0"
+                border="0"
+                style="margin-top:24px;"
+              >
+                <tr>
+                  <td
+                    width="4"
+                    style="
+                      width:4px;
+                      background:#00a7af;
+                      border-radius:999px;
+                    "
+                  ></td>
+
+                  <td style="
+                    padding-left:13px;
+                    color:#526979;
+                    font-size:12px;
+                    line-height:19px;
+                  ">
+                    Keep this code private. Never share a verification code with anyone else.
+                  </td>
+                </tr>
+              </table>
+
+              <div style="
+                height:1px;
+                background:#e0eaec;
+                margin:28px 0 20px;
+              "></div>
+
+              <p style="
+                margin:0;
+                color:#738693;
+                font-size:12px;
+                line-height:19px;
+              ">
+                If you didn't request this code, you can safely ignore this email.
+              </p>
+
             </td>
-          </tr></table>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:24px;"><tr>
-            <td width="4" style="width:4px; background:#00a7af; border-radius:999px;"></td>
-            <td style="padding-left:13px; color:#526979; font-size:12px; line-height:19px;">Keep this code private. Never share a verification code with anyone else.</td>
-          </tr></table>
-          <div style="height:1px; background:#e0eaec; margin:28px 0 20px;"></div>
-          <p style="margin:0; color:#738693; font-size:12px; line-height:19px;">If you didn't request this code, you can safely ignore this email.</p>
-        </td></tr>
-        <tr><td align="center" style="padding:20px 20px 0; color:#82939d; font-size:10px; line-height:17px;">BraverTogether · Digital Legal Literacy</td></tr>
-      </table>
-    </td></tr>
+          </tr>
+
+          <tr>
+            <td
+              align="center"
+              style="
+                padding:20px 20px 0;
+                color:#82939d;
+                font-size:10px;
+                line-height:17px;
+              "
+            >
+              BraverTogether · Digital Legal Literacy
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
   </table>
 </body>
 </html>
