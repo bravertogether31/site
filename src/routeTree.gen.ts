@@ -29,6 +29,7 @@ import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$sl
 import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
 import { Route as ApiNeonSignupRouteImport } from './routes/api/neon-signup'
 import { Route as ApiNeonLegacyLoginRouteImport } from './routes/api/neon-legacy-login'
+import { Route as ApiNeonAuthEmailWebhookRouteImport } from './routes/api/neon-auth-email-webhook'
 import { Route as ApiNeonAccountRouteImport } from './routes/api/neon-account'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
@@ -139,6 +140,11 @@ const ApiNeonLegacyLoginRoute = ApiNeonLegacyLoginRouteImport.update({
   path: '/api/neon-legacy-login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNeonAuthEmailWebhookRoute = ApiNeonAuthEmailWebhookRouteImport.update({
+  id: '/api/neon-auth-email-webhook',
+  path: '/api/neon-auth-email-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNeonAccountRoute = ApiNeonAccountRouteImport.update({
   id: '/api/neon-account',
   path: '/api/neon-account',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
+  '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
+  '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
@@ -284,6 +292,7 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
+  '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/profile'
     | '/api/neon-account'
+    | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/profile'
     | '/api/neon-account'
+    | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/profile'
     | '/api/neon-account'
+    | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TeamRoute: typeof TeamRoute
   ApiNeonAccountRoute: typeof ApiNeonAccountRoute
+  ApiNeonAuthEmailWebhookRoute: typeof ApiNeonAuthEmailWebhookRoute
   ApiNeonLegacyLoginRoute: typeof ApiNeonLegacyLoginRoute
   ApiNeonSignupRoute: typeof ApiNeonSignupRoute
   ApiSignupEmailCheckRoute: typeof ApiSignupEmailCheckRoute
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNeonLegacyLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/neon-auth-email-webhook': {
+      id: '/api/neon-auth-email-webhook'
+      path: '/api/neon-auth-email-webhook'
+      fullPath: '/api/neon-auth-email-webhook'
+      preLoaderRoute: typeof ApiNeonAuthEmailWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/neon-account': {
       id: '/api/neon-account'
       path: '/api/neon-account'
@@ -670,6 +690,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TeamRoute: TeamRoute,
   ApiNeonAccountRoute: ApiNeonAccountRoute,
+  ApiNeonAuthEmailWebhookRoute: ApiNeonAuthEmailWebhookRoute,
   ApiNeonLegacyLoginRoute: ApiNeonLegacyLoginRoute,
   ApiNeonSignupRoute: ApiNeonSignupRoute,
   ApiSignupEmailCheckRoute: ApiSignupEmailCheckRoute,
