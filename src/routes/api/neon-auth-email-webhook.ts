@@ -8,21 +8,43 @@ const fixedHeaders = {
 };
 const FROM = "BraverTogether <no-reply@mail.bravertogether.site>";
 
+type SafeEmailFailure =
+  | "resend_key_missing_or_invalid"
+  | "resend_provider_rejected"
+  | "resend_provider_unavailable";
+class EmailDeliveryFailure extends Error {
+  constructor(readonly reason: SafeEmailFailure, readonly status: number | null = null) {
+    super(reason);
+  }
+}
+let readinessLogged = false;
+function resendKey(): string {
+  return process.env.RESEND_API_KEY || process.env.BRAVER_RESEND_API_KEY || "";
+}
+function hasUsableResendKey(): boolean {
+  return /^re_[A-Za-z0-9_-]{10,}$/.test(resendKey());
+}
+
 async function deliverEmail(email: string, message: { subject:string; html:string; text:string }, eventId: string) {
-  const key = process.env.RESEND_API_KEY || process.env.BRAVER_RESEND_API_KEY || "";
-  if (!/^re_[A-Za-z0-9_-]{10,}$/.test(key)) throw new Error("Resend is not configured");
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${key}`,
-      "Content-Type": "application/json",
-      "Idempotency-Key": `braver-neon-${eventId}`,
-    },
-    body: JSON.stringify({ from: FROM, to: [email], ...message }),
-    redirect: "error",
-    signal: AbortSignal.timeout(3_500),
-  });
-  if (!response.ok) throw new Error("Email provider did not accept delivery");
+  const key = resendKey();
+  if (!hasUsableResendKey()) throw new EmailDeliveryFailure("resend_key_missing_or_invalid");
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": `braver-neon-${eventId}`,
+      },
+      body: JSON.stringify({ from: FROM, to: [email], ...message }),
+      redirect: "error",
+      signal: AbortSignal.timeout(3_500),
+    });
+  } catch {
+    throw new EmailDeliveryFailure("resend_provider_unavailable");
+  }
+  if (!response.ok) throw new EmailDeliveryFailure("resend_provider_rejected", response.status);
 }
 
 /** Do not send signup verification to a previously completed member. */
@@ -43,6 +65,14 @@ async function handler({request}:{request:Request}):Promise<Response> {
   if (process.env.BRAVER_AUTH_PROVIDER !== "neon" ||
       process.env.BRAVER_AUTH_EMAIL_WEBHOOK_ENABLED !== "1") {
     return Response.json({ error: "Email delivery integration is disabled" }, {status:503,headers:fixedHeaders});
+  }
+  // One sanitized readiness record per server instance. No key, token,
+  // recipient, event id, or link is printed or returned to the caller.
+  if (!readinessLogged) {
+    readinessLogged = true;
+    console.info("[braver-email] provider_readiness", {
+      resend_key_configured: hasUsableResendKey(),
+    });
   }
   if (request.headers.get("content-type")?.split(";")[0]?.trim() !== "application/json" ||
       Number(request.headers.get("content-length") || 0) > 20_000) {
@@ -71,10 +101,17 @@ async function handler({request}:{request:Request}):Promise<Response> {
           event.event_data.link_type as "email-verification" | "sign-in" | "forget-password");
     await deliverEmail(email,message,event.event_id);
     return Response.json({ok:true},{headers:fixedHeaders});
-  } catch {
-    // Neon will retry with the SAME event id; Resend's idempotency key prevents
-    // duplicate deliveries if the response was lost after successful send.
-    // Never log the recipient, verification code, link or API token.
+  } catch (error) {
+    // Only a hard-coded classification and optionally a numeric provider HTTP
+    // status are logged. No recipient, password, OTP, URL or provider body.
+    const failure = error instanceof EmailDeliveryFailure ? error : null;
+    console.error("[braver-email] delivery_failed", {
+      reason: failure?.reason ?? "unexpected_processing_error",
+      provider_status: failure?.status ?? null,
+      event_type: event.event_type,
+    });
+    // Neon retries the SAME event id; Resend's idempotency key prevents
+    // duplicates if the initial response was lost after a successful send.
     return Response.json({error:"Email delivery temporarily unavailable"},{status:503,headers:fixedHeaders});
   }
 }
