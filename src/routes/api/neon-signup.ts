@@ -121,7 +121,11 @@ export const Route=createFileRoute("/api/neon-signup")({server:{handlers:{
     }
     const password=randomBytes(48).toString("base64url");
     const response=await auth.signUp.email({email:data.email,name:data.fullName,password});
-    if(response.error)return Response.json({error:"Could not send a verification code. If you already have an account, sign in instead."},{status:400,headers});
+    if(response.error)return Response.json({error:"Could not create your registration. If you already have an account, sign in instead."},{status:400,headers});
+    // Email OTP does not necessarily send automatically during password signup.
+    // Explicitly send the first code, just as we do for pending-account resends.
+    const firstCode=await auth.emailOtp.sendVerificationOtp({email:data.email,type:"email-verification"});
+    if(firstCode.error)return Response.json({error:"Registration was saved, but the verification code could not be sent. Please retry."},{status:503,headers});
     return Response.json({ok:true},{headers});
    }catch{return Response.json({error:"Verification code could not be sent."},{status:503,headers})}
   }
