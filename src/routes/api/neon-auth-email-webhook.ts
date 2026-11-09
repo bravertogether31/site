@@ -70,8 +70,15 @@ async function handler({request}:{request:Request}):Promise<Response> {
   // recipient, event id, or link is printed or returned to the caller.
   if (!readinessLogged) {
     readinessLogged = true;
+    const primary = process.env.RESEND_API_KEY || "";
+    const fallback = process.env.BRAVER_RESEND_API_KEY || "";
+    const selected = primary || fallback;
     console.info("[braver-email] provider_readiness", {
+      resend_api_key_present: primary.length > 0,
+      legacy_key_alias_present: fallback.length > 0,
       resend_key_configured: hasUsableResendKey(),
+      key_prefix_valid: selected.startsWith("re_"),
+      has_outer_whitespace: selected !== selected.trim(),
     });
   }
   if (request.headers.get("content-type")?.split(";")[0]?.trim() !== "application/json" ||
