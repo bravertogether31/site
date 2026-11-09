@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { loadNeonSessionStatus } from "@/integrations/neon/session-status.browser";
 
 const neonMode = import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon";
 
@@ -15,21 +16,20 @@ function loadCurrentUser(): Promise<User | null> {
   if (cachedUser !== undefined) return Promise.resolve(cachedUser);
   if (!pendingUserRequest) {
     const neonSession = async (): Promise<{ data: { user: User | null } }> => {
-      const response = await fetch("/api/neon-auth/get-session", {
-        credentials: "same-origin", cache: "no-store",
-      });
-      if (!response.ok) throw new Error("Neon session check failed");
-      const payload = await response.json();
-      const u = payload?.user;
-      if (!u?.id || !u.email || u.emailVerified !== true) return { data: { user: null } };
-      // The navigation layer only needs these identity fields. All actual
-      // authorization remains server-side and rechecks the live role rows.
+      // A single first-party request validates the Neon session AND the
+      // authoritative signup_completed flag. Incomplete registrations
+      // cannot be mistaken for signed-in members during navigation.
+      const state = await loadNeonSessionStatus(true);
+      if (!state) return { data: { user: null } };
       const user = {
-        id: u.id, email: u.email,
+        id: state.id, email: state.email,
         app_metadata: {},
-        user_metadata: { full_name: u.name, signup_completed: true },
+        user_metadata: {
+          full_name: state.name ?? "",
+          signup_completed: state.signup_completed,
+        },
         aud: "authenticated",
-        created_at: u.createdAt ?? "",
+        created_at: "",
       } as User;
       return { data: { user } };
     };

@@ -1,5 +1,6 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import type { User } from "@supabase/supabase-js";
+import { clearNeonSessionStatus, loadNeonSessionStatus } from "./session-status.browser";
 
 // Browser-only Neon Data API adapter with first-party session and JWT proxy.
 function dataApiUrl(): string {
@@ -36,6 +37,7 @@ function invalidateAuthCache(){
   identityCachedAt=0;
   cachedBearer=null;
   tokenPromise=null;
+  clearNeonSessionStatus();
 }
 function installInvalidation(){
   if(typeof window!=="undefined" && !invalidationInstalled){
@@ -48,18 +50,14 @@ async function currentUser(fresh=false):Promise<User|null> {
   installInvalidation();
   if (!cachedIdentity || fresh || Date.now()-identityCachedAt>IDENTITY_TTL_MS) {
     identityCachedAt=Date.now();
-    cachedIdentity=fetch("/api/neon-auth/get-session",{credentials:"same-origin",cache:"no-store"})
-      .then(async res=> {
-        if(!res.ok)return null;
-        const json=await res.json();
-        if(!json?.user?.emailVerified)return null;
-        let completed=true;
-        try{
-          const state=await fetch("/api/neon-signup",{credentials:"same-origin",cache:"no-store"});
-          if(state.ok){const item=await state.json();completed=item?.signup_completed===true;}
-        }catch{ /* Missing status is not proof of a completed signup. */ completed=false; }
-        return convertUser(json?.user,completed);
-      }).catch(()=>null);
+    cachedIdentity=loadNeonSessionStatus(fresh)
+      .then(state => state
+        ? convertUser({
+            id: state.id, email: state.email,
+            name: state.name ?? undefined, emailVerified: true,
+          }, state.signup_completed)
+        : null)
+      .catch(()=>null);
   }
   return cachedIdentity;
 }
