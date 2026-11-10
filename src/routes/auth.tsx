@@ -14,7 +14,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { authSearchSchema } from "@/lib/auth-search";
 
 import { AdvisorIntentTrigger } from "@/components/AdvisorIntentDialog";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
@@ -29,10 +29,7 @@ import { roleHome } from "@/lib/account-access";
 import { getAccountAccessState, getNeonAccountAccessState } from "@/lib/account-access.functions";
 import { cn } from "@/lib/utils";
 
-const AuthSearch = z.object({
-  mode: z.enum(["signup", "signin"]).optional(),
-  recovery: z.literal("1").optional(),
-});
+const AuthSearch = authSearchSchema;
 
 type AuthMode = "signin" | "signup";
 type SignupStep = "details" | "otp" | "password";
