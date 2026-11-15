@@ -7,7 +7,7 @@ import { getPublicCompetition } from '@/lib/competition.functions';
 import { publiclyAnnouncedResultsAt } from '@/lib/competition-rules';
 
 const date = (value: string | null) => value
-  ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value))
+  ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value))
   : 'Not announced';
 
 const closingDate = (value: string | null) => value

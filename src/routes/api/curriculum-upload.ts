@@ -29,7 +29,9 @@ export const Route = createFileRoute("/api/curriculum-upload")({
         try {
           const { requireNeonAccountSession } = await import("@/integrations/neon/auth.server");
           const { loadAccountAccessState } = await import("@/lib/account-access.functions");
-          const { id: adminId } = await requireNeonAccountSession();
+          let adminId: string;
+          try { adminId = (await requireNeonAccountSession()).id; }
+          catch { return Response.json({ error: "Please sign in as an administrator." }, { status: 401, headers: HEADERS }); }
           if ((await loadAccountAccessState(adminId)).role !== "administrator") {
             return Response.json({ error: "Administrator access is required." }, { status: 403, headers: HEADERS });
           }
