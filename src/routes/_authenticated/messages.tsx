@@ -83,6 +83,8 @@ function MessagesPage() {
   const getAccess = useServerFn(getAccountAccessState);
   const getNeonAccess = useServerFn(getNeonAccountAccessState);
   const [me, setMe] = useState<MeProfile | null>(null);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const [workspaceRetry, setWorkspaceRetry] = useState(0);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
@@ -95,38 +97,59 @@ function MessagesPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) {
+        setWorkspaceError("The inbox is taking too long to connect. Check your connection and retry.");
+      }
+    }, 15_000);
 
     async function initialize() {
-      const [{ data: auth }, access] = await Promise.all([
-        supabase.auth.getUser(),
-        (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getNeonAccess() : getAccess()),
-      ]);
-      if (!auth.user || cancelled) return;
-      if (access.role !== "member" && access.role !== "advisor") {
-        await navigate({ to: roleHome(access.role), replace: true });
-        return;
-      }
+      setWorkspaceError(null);
+      try {
+        const [{ data: auth }, access] = await Promise.all([
+          supabase.auth.getUser(),
+          (import.meta.env.VITE_BRAVER_AUTH_PROVIDER === "neon" ? getNeonAccess() : getAccess()),
+        ]);
+        if (cancelled) return;
+        if (!auth.user) {
+          setWorkspaceError("Your session could not be verified. Sign in again or retry.");
+          return;
+        }
+        if (access.role !== "member" && access.role !== "advisor") {
+          await navigate({ to: roleHome(access.role), replace: true });
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, display_name")
-        .eq("id", auth.user.id)
-        .maybeSingle();
-
-      if (!cancelled) {
-        setMe({
-          id: auth.user.id,
-          is_advisor: access.role === "advisor",
-          display_name: profile?.display_name || (access.role === "advisor" ? "Advisor" : "Member"),
-        });
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, display_name")
+          .eq("id", auth.user.id)
+          .maybeSingle();
+        if (profileError) throw profileError;
+        if (!cancelled) {
+          setMe({
+            id: auth.user.id,
+            is_advisor: access.role === "advisor",
+            display_name: profile?.display_name || (access.role === "advisor" ? "Advisor" : "Member"),
+          });
+          setWorkspaceError(null);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("[Messages] Workspace initialization failed", error instanceof Error ? error.name : "unknown");
+          setWorkspaceError("The inbox could not connect. Please retry.");
+        }
+      } finally {
+        window.clearTimeout(timeout);
       }
     }
 
     void initialize();
     return () => {
       cancelled = true;
+      window.clearTimeout(timeout);
     };
-  }, [getAccess, navigate]);
+  }, [getAccess, getNeonAccess, navigate, workspaceRetry]);
 
   useEffect(() => {
     if (!me) return;
@@ -231,8 +254,21 @@ function MessagesPage() {
     return (
       <SiteLayout>
         <Section className="py-24 text-center">
-          <Loader2 className="mx-auto h-7 w-7 animate-spin text-teal" />
-          <p className="mt-3 text-sm text-muted-foreground">Loading your workspace…</p>
+          {workspaceError ? (
+            <>
+              <h1 className="text-xl font-semibold">Inbox unavailable</h1>
+              <p role="alert" className="mt-3 text-sm text-muted-foreground">{workspaceError}</p>
+              <button type="button" onClick={() => setWorkspaceRetry(v => v + 1)}
+                className="mt-5 rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white">
+                Retry inbox
+              </button>
+            </>
+          ) : (
+            <>
+              <Loader2 className="mx-auto h-7 w-7 animate-spin text-teal" />
+              <p className="mt-3 text-sm text-muted-foreground">Loading your workspace…</p>
+            </>
+          )}
         </Section>
       </SiteLayout>
     );
