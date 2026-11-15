@@ -1,3 +1,5 @@
+import { usePublicSiteCopy } from "@/hooks/use-public-site-copy";
+import { SITE_COPY_DEFAULTS } from "@/lib/site-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BookOpen, Download, FileText, Search } from "lucide-react";
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/curriculums")({
 });
 
 function Curriculums() {
+  const copy = usePublicSiteCopy();
   const docs = Route.useLoaderData() as CurriculumDocument[];
   const { tab } = Route.useSearch();
   const kind: CurriculumDocument["kind"] = tab === "cheat-sheets" ? "cheat_sheet" : "curriculum";
@@ -46,8 +49,7 @@ function Curriculums() {
             Curriculums for the digital world.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-navy-deep/75">
-            Practical country-specific learning materials to help young people understand
-            privacy, technology law, online safety and their digital rights.
+            {copy["curriculums.intro"] ?? SITE_COPY_DEFAULTS["curriculums.intro"]}
           </p>
         </Section>
       </div>

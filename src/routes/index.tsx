@@ -1,3 +1,5 @@
+import { usePublicSiteCopy } from "@/hooks/use-public-site-copy";
+import { SITE_COPY_DEFAULTS } from "@/lib/site-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, FileSearch, MessageCircle, Trophy, Users, Sparkles, ShieldCheck, Lock, Scale, Globe2 } from "lucide-react";
 import { SiteLayout, Section, Eyebrow } from "@/components/SiteLayout";
@@ -24,6 +26,7 @@ const offerings = [
 ];
 
 function Home() {
+  const copy = usePublicSiteCopy();
   return (
     <SiteLayout>
       {/* HERO */}
@@ -37,7 +40,7 @@ function Home() {
               No Law Degree Required.
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-navy-deep/70 max-w-2xl">
-              The internet has rules — and most teens never get taught them. We're changing that.
+              {copy["home.hero_description"] ?? SITE_COPY_DEFAULTS["home.hero_description"]}
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Link to="/decoder" className="inline-flex items-center gap-2 rounded-full bg-mesh text-white px-6 py-3 font-semibold shadow-glow hover:brightness-110 transition">
@@ -90,9 +93,9 @@ function Home() {
             <h2 className="mt-4 text-4xl font-bold">An intro to the platform</h2>
           </div>
           <div className="space-y-5 text-muted-foreground leading-relaxed">
-            <p>Every time you download an app, scroll through social media, or click "I Agree" on a terms and conditions page, the law is involved. But nobody's teaching you what any of it actually means — until now.</p>
-            <p>This platform was built specifically for teens aged 12–18 who deserve to understand their digital rights in plain, honest language. No jargon. No lectures. Just the real stuff that affects your everyday life online.</p>
-            <p>Whether you want to know what TikTok can actually do with your data, whether your school can monitor your DMs, or what you're really agreeing to when you sign up for a platform — this is your space to find out.</p>
+            <p>{copy["home.platform_paragraph_1"] ?? SITE_COPY_DEFAULTS["home.platform_paragraph_1"]}</p>
+            <p>{copy["home.platform_paragraph_2"] ?? SITE_COPY_DEFAULTS["home.platform_paragraph_2"]}</p>
+            <p>{copy["home.platform_paragraph_3"] ?? SITE_COPY_DEFAULTS["home.platform_paragraph_3"]}</p>
           </div>
         </div>
       </Section>

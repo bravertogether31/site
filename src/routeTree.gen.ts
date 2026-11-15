@@ -35,13 +35,16 @@ import { Route as AuthenticatedEssaySubmissionRouteImport } from './routes/_auth
 import { Route as AuthenticatedMeetingsRouteImport } from './routes/_authenticated/meetings'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSiteEditorRouteImport } from './routes/_authenticated/site-editor'
 import { Route as ApiCurriculumFileRouteImport } from './routes/api/curriculum-file'
 import { Route as ApiCurriculumUploadRouteImport } from './routes/api/curriculum-upload'
+import { Route as ApiEditorAccessRouteImport } from './routes/api/editor-access'
 import { Route as ApiNeonAccountRouteImport } from './routes/api/neon-account'
 import { Route as ApiNeonAuthEmailWebhookRouteImport } from './routes/api/neon-auth-email-webhook'
 import { Route as ApiNeonLegacyLoginRouteImport } from './routes/api/neon-legacy-login'
 import { Route as ApiNeonSignupRouteImport } from './routes/api/neon-signup'
 import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
+import { Route as ApiSiteCopyRouteImport } from './routes/api/site-copy'
 import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$slug'
 import { Route as ApiNeonAuthSplatRouteImport } from './routes/api/neon-auth/$'
 
@@ -180,6 +183,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSiteEditorRoute = AuthenticatedSiteEditorRouteImport.update({
+  id: '/site-editor',
+  path: '/site-editor',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiCurriculumFileRoute = ApiCurriculumFileRouteImport.update({
   id: '/api/curriculum-file',
   path: '/api/curriculum-file',
@@ -188,6 +196,11 @@ const ApiCurriculumFileRoute = ApiCurriculumFileRouteImport.update({
 const ApiCurriculumUploadRoute = ApiCurriculumUploadRouteImport.update({
   id: '/api/curriculum-upload',
   path: '/api/curriculum-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditorAccessRoute = ApiEditorAccessRouteImport.update({
+  id: '/api/editor-access',
+  path: '/api/editor-access',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiNeonAccountRoute = ApiNeonAccountRouteImport.update({
@@ -213,6 +226,11 @@ const ApiNeonSignupRoute = ApiNeonSignupRouteImport.update({
 const ApiSignupEmailCheckRoute = ApiSignupEmailCheckRouteImport.update({
   id: '/api/signup-email-check',
   path: '/api/signup-email-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSiteCopyRoute = ApiSiteCopyRouteImport.update({
+  id: '/api/site-copy',
+  path: '/api/site-copy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompetitionsSlugRoute = CompetitionsSlugRouteImport.update({
@@ -252,13 +270,16 @@ export interface FileRoutesByFullPath {
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/site-editor': typeof AuthenticatedSiteEditorRoute
   '/api/curriculum-file': typeof ApiCurriculumFileRoute
   '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
+  '/api/editor-access': typeof ApiEditorAccessRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
+  '/api/site-copy': typeof ApiSiteCopyRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
 }
@@ -288,13 +309,16 @@ export interface FileRoutesByTo {
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/site-editor': typeof AuthenticatedSiteEditorRoute
   '/api/curriculum-file': typeof ApiCurriculumFileRoute
   '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
+  '/api/editor-access': typeof ApiEditorAccessRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
+  '/api/site-copy': typeof ApiSiteCopyRoute
   '/competitions/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
 }
@@ -326,13 +350,16 @@ export interface FileRoutesById {
   '/_authenticated/meetings': typeof AuthenticatedMeetingsRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/site-editor': typeof AuthenticatedSiteEditorRoute
   '/api/curriculum-file': typeof ApiCurriculumFileRoute
   '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
+  '/api/editor-access': typeof ApiEditorAccessRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
   '/api/neon-signup': typeof ApiNeonSignupRoute
   '/api/signup-email-check': typeof ApiSignupEmailCheckRoute
+  '/api/site-copy': typeof ApiSiteCopyRoute
   '/competitions_/$slug': typeof CompetitionsSlugRoute
   '/api/neon-auth/$': typeof ApiNeonAuthSplatRoute
 }
@@ -364,13 +391,16 @@ export interface FileRouteTypes {
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/site-editor'
     | '/api/curriculum-file'
     | '/api/curriculum-upload'
+    | '/api/editor-access'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
+    | '/api/site-copy'
     | '/competitions/$slug'
     | '/api/neon-auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -400,13 +430,16 @@ export interface FileRouteTypes {
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/site-editor'
     | '/api/curriculum-file'
     | '/api/curriculum-upload'
+    | '/api/editor-access'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
+    | '/api/site-copy'
     | '/competitions/$slug'
     | '/api/neon-auth/$'
   id:
@@ -437,13 +470,16 @@ export interface FileRouteTypes {
     | '/_authenticated/meetings'
     | '/_authenticated/messages'
     | '/_authenticated/profile'
+    | '/_authenticated/site-editor'
     | '/api/curriculum-file'
     | '/api/curriculum-upload'
+    | '/api/editor-access'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
     | '/api/neon-signup'
     | '/api/signup-email-check'
+    | '/api/site-copy'
     | '/competitions_/$slug'
     | '/api/neon-auth/$'
   fileRoutesById: FileRoutesById
@@ -468,11 +504,13 @@ export interface RootRouteChildren {
   TeamRoute: typeof TeamRoute
   ApiCurriculumFileRoute: typeof ApiCurriculumFileRoute
   ApiCurriculumUploadRoute: typeof ApiCurriculumUploadRoute
+  ApiEditorAccessRoute: typeof ApiEditorAccessRoute
   ApiNeonAccountRoute: typeof ApiNeonAccountRoute
   ApiNeonAuthEmailWebhookRoute: typeof ApiNeonAuthEmailWebhookRoute
   ApiNeonLegacyLoginRoute: typeof ApiNeonLegacyLoginRoute
   ApiNeonSignupRoute: typeof ApiNeonSignupRoute
   ApiSignupEmailCheckRoute: typeof ApiSignupEmailCheckRoute
+  ApiSiteCopyRoute: typeof ApiSiteCopyRoute
   CompetitionsSlugRoute: typeof CompetitionsSlugRoute
   ApiNeonAuthSplatRoute: typeof ApiNeonAuthSplatRoute
 }
@@ -661,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/site-editor': {
+      id: '/_authenticated/site-editor'
+      path: '/site-editor'
+      fullPath: '/site-editor'
+      preLoaderRoute: typeof AuthenticatedSiteEditorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/curriculum-file': {
       id: '/api/curriculum-file'
       path: '/api/curriculum-file'
@@ -673,6 +718,13 @@ declare module '@tanstack/react-router' {
       path: '/api/curriculum-upload'
       fullPath: '/api/curriculum-upload'
       preLoaderRoute: typeof ApiCurriculumUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/editor-access': {
+      id: '/api/editor-access'
+      path: '/api/editor-access'
+      fullPath: '/api/editor-access'
+      preLoaderRoute: typeof ApiEditorAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/neon-account': {
@@ -710,6 +762,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSignupEmailCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/site-copy': {
+      id: '/api/site-copy'
+      path: '/api/site-copy'
+      fullPath: '/api/site-copy'
+      preLoaderRoute: typeof ApiSiteCopyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/competitions_/$slug': {
       id: '/competitions_/$slug'
       path: '/competitions/$slug'
@@ -737,6 +796,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMeetingsRoute: typeof AuthenticatedMeetingsRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSiteEditorRoute: typeof AuthenticatedSiteEditorRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -749,6 +809,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMeetingsRoute: AuthenticatedMeetingsRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSiteEditorRoute: AuthenticatedSiteEditorRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -774,11 +835,13 @@ const rootRouteChildren: RootRouteChildren = {
   TeamRoute: TeamRoute,
   ApiCurriculumFileRoute: ApiCurriculumFileRoute,
   ApiCurriculumUploadRoute: ApiCurriculumUploadRoute,
+  ApiEditorAccessRoute: ApiEditorAccessRoute,
   ApiNeonAccountRoute: ApiNeonAccountRoute,
   ApiNeonAuthEmailWebhookRoute: ApiNeonAuthEmailWebhookRoute,
   ApiNeonLegacyLoginRoute: ApiNeonLegacyLoginRoute,
   ApiNeonSignupRoute: ApiNeonSignupRoute,
   ApiSignupEmailCheckRoute: ApiSignupEmailCheckRoute,
+  ApiSiteCopyRoute: ApiSiteCopyRoute,
   CompetitionsSlugRoute: CompetitionsSlugRoute,
   ApiNeonAuthSplatRoute: ApiNeonAuthSplatRoute,
 }

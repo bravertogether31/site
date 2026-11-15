@@ -322,6 +322,16 @@ export type Database = {
           youtube_video_id?: string;
         }
       >;
+      site_content_editors: Table<
+        {user_id: string; added_at: string},
+        {user_id: string; added_at?: string},
+        {user_id?: string; added_at?: string}
+      >;
+      site_copy: Table<
+        {key: string; value: string; edited_by: string; updated_at: string},
+        {key: string; value: string; edited_by: string; updated_at?: string},
+        {key?: string; value?: string; edited_by?: string; updated_at?: string}
+      >;
       user_roles: Table<
         { created_at: string; id: string; role: Database["public"]["Enums"]["app_role"]; user_id: string },
         { created_at?: string; id?: string; role: Database["public"]["Enums"]["app_role"]; user_id: string },

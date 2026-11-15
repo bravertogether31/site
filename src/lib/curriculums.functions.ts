@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requireAccountRole } from "@/lib/account-access.functions";
+import { requireContentEditor } from "@/lib/content-editor-permissions.server";
 
 export type CurriculumDocument = {
   id: string;
@@ -54,7 +54,7 @@ export const listPublicCurriculums = createServerFn({ method: "GET" })
 export const listAdminCurriculums = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CurriculumDocument[]> => {
-    await requireAccountRole(context.userId, ["administrator"]);
+    await requireContentEditor(context.userId);
     if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
       const result = await (await pool()).query<CurriculumDocument>(
         `SELECT id,title,country,description,kind,original_filename,file_size_bytes,published,created_at
@@ -74,7 +74,7 @@ export const updateCurriculumDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((value: unknown) => UPDATE.parse(value))
   .handler(async ({ context, data }) => {
-    await requireAccountRole(context.userId, ["administrator"]);
+    await requireContentEditor(context.userId);
     if (process.env.BRAVER_AUTH_PROVIDER === "neon") {
       const result = await (await pool()).query(
         `UPDATE public.curriculum_documents SET title=$2,country=$3,description=$4,
