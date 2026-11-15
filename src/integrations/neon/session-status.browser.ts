@@ -21,6 +21,12 @@ let cached: { at: number; value: NeonSessionStatus | null } | undefined;
 let pending: Promise<NeonSessionStatus | null> | undefined;
 let generation = 0;
 
+// Public page server functions need no bearer when the existing short-lived
+// session check has already established that this visitor is signed out.
+export function hasRecentAnonymousNeonSession(): boolean {
+  return Boolean(cached && cached.value === null && Date.now() - cached.at < TTL_MS);
+}
+
 export function clearNeonSessionStatus(): void {
   generation += 1;
   cached = undefined;
