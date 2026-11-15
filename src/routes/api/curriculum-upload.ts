@@ -53,7 +53,14 @@ export const Route = createFileRoute("/api/curriculum-upload")({
             return Response.json({ error: "Enter a title, country, category, and a PDF no larger than 10 MB." }, { status: 400, headers: HEADERS });
           }
           const bytes = new Uint8Array(await file.arrayBuffer());
-          validateDocument(bytes, "application/pdf");
+          try {
+            validateDocument(bytes, "application/pdf");
+          } catch {
+            return Response.json(
+              { error: "The selected file is not a valid PDF." },
+              { status: 400, headers: HEADERS },
+            );
+          }
 
           const documentId = randomUUID();
           const objectKey = `${adminId}/${documentId}.pdf`;
