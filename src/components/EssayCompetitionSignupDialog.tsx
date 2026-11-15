@@ -12,18 +12,18 @@ const RESUME_KEY = "braver_competition_resume";
  * The submission portal, not the modal, stores the actual entrant registration.
  * Non-essay pages and existing logged-in users are left untouched.
  */
-export function EssayCompetitionSignupDialog({ slug }: { slug: string }) {
+export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { slug: string; acceptingSubmissions: boolean }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (loading || user || !/^[a-z0-9-]{1,120}$/.test(slug)) return;
+    if (loading || user || !acceptingSubmissions || !/^[a-z0-9-]{1,120}$/.test(slug)) return;
     const key = `braver_essay_signup_prompt:${slug}`;
     if (window.sessionStorage.getItem(key)) return;
     window.sessionStorage.setItem(key, "seen");
     setOpen(true);
-  }, [loading, user, slug]);
+  }, [loading, user, slug, acceptingSubmissions]);
 
   const begin = (mode: "signup" | "signin") => {
     window.sessionStorage.setItem(RESUME_KEY, slug);
@@ -31,7 +31,7 @@ export function EssayCompetitionSignupDialog({ slug }: { slug: string }) {
     void navigate({ to: "/auth", search: { mode } });
   };
 
-  if (loading || user) return null;
+  if (loading || user || !acceptingSubmissions) return null;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg rounded-3xl p-6 sm:p-8">

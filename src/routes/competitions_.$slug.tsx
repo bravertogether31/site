@@ -4,6 +4,7 @@ import { ExternalLink, Mic2 } from 'lucide-react';
 import { SiteLayout, Section, Eyebrow } from '@/components/SiteLayout';
 import { EssayCompetitionSignupDialog } from '@/components/EssayCompetitionSignupDialog';
 import { getPublicCompetition } from '@/lib/competition.functions';
+import { publiclyAnnouncedResultsAt } from '@/lib/competition-rules';
 
 const date = (value: string | null) => value
   ? new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value))
@@ -43,7 +44,7 @@ function Competition() {
 
   return (
     <SiteLayout>
-      <EssayCompetitionSignupDialog slug={c.slug} />
+      <EssayCompetitionSignupDialog slug={c.slug} acceptingSubmissions={c.acceptingSubmissions} />
       <div className="bg-hero">
         <Section>
           <Eyebrow>{c.acceptingSubmissions ? 'Submissions open' : 'Submissions closed'}</Eyebrow>
@@ -54,7 +55,7 @@ function Competition() {
               ['Eligibility', c.minimum_age === null ? `${c.maximum_age} years old and under` : `Ages ${c.minimum_age}–${c.maximum_age}`],
               ['Word limit', c.maximum_words ? `Maximum ${c.maximum_words.toLocaleString()} words` : 'See rules'],
               ['Submissions', `${date(c.opens_at)} – ${closingDate(c.closes_at)}`],
-              ['Results', date(c.results_at)],
+              ['Results', c.results_at && !publiclyAnnouncedResultsAt(c) ? 'To be announced' : date(c.results_at)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border bg-card p-5">
                 <dt className="text-sm text-teal">{label}</dt>
