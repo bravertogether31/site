@@ -5,8 +5,8 @@ const origin = "https://bravertogether.site";
 // database, Neon auth, a cold compute, or a temporary upstream outage.
 // New competition slugs should be added here as part of publication.
 const paths = [
-  "/", "/about", "/team", "/resources", "/advisors",
-  "/competitions", "/events", "/news", "/decoder",
+  "/", "/about", "/team", "/curriculums", "/resources", "/advisors",
+  "/competitions", "/events", "/decoder",
   "/privacy", "/safety", "/community-guidelines",
   "/competitions/digital-legal-rights-essay-2026",
   "/competitions/voice-on-trial-vidolo-bravertogether-2026",

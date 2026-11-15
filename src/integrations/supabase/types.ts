@@ -83,6 +83,26 @@ export type Database = {
         { actor_key: string; feature: string; request_count?: number; updated_at?: string; usage_date?: string },
         { actor_key?: string; feature?: string; request_count?: number; updated_at?: string; usage_date?: string }
       >;
+      curriculum_documents: Table<
+        {
+          id: string; title: string; country: string; description: string;
+          kind: "curriculum" | "cheat_sheet"; storage_key: string;
+          original_filename: string; file_size_bytes: number; file_sha256: string;
+          published: boolean; uploaded_by: string; created_at: string; updated_at: string;
+        },
+        {
+          id?: string; title: string; country: string; description?: string;
+          kind: "curriculum" | "cheat_sheet"; storage_key: string;
+          original_filename: string; file_size_bytes: number; file_sha256: string;
+          published?: boolean; uploaded_by: string; created_at?: string; updated_at?: string;
+        },
+        {
+          id?: string; title?: string; country?: string; description?: string;
+          kind?: "curriculum" | "cheat_sheet"; storage_key?: string;
+          original_filename?: string; file_size_bytes?: number; file_sha256?: string;
+          published?: boolean; uploaded_by?: string; created_at?: string; updated_at?: string;
+        }
+      >;
       conversation_reads: Table<
         { conversation_id: string; last_read_at: string; user_id: string },
         { conversation_id: string; last_read_at?: string; user_id: string },

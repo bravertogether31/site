@@ -2,11 +2,12 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export const PRIVATE_BUCKETS = new Set(["essay-submissions", "advisor-cvs"]);
+export const PRIVATE_BUCKETS = new Set(["essay-submissions", "advisor-cvs", "curriculums"]);
 const MIME = new Set([
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -66,6 +67,21 @@ function s3() {
     };
   }
   return cached.client;
+}
+
+/** Server-to-storage transfer keeps browser CORS and S3 credentials out of uploads. */
+export async function uploadPrivatePdf(bucket: string, key: string, bytes: Uint8Array) {
+  validateBucket(bucket);
+  validateKey(key);
+  if (bytes.length === 0 || bytes.length > 10 * 1024 * 1024) {
+    throw new Error("The PDF must be between 1 byte and 10 MB.");
+  }
+  await s3().send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: bytes,
+    ContentType: "application/pdf",
+  }));
 }
 
 export async function presignPrivateDocumentUpload(options: {

@@ -72,13 +72,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BraverTogether — Digital Legal Literacy for Teens" },
+      { title: "BraverTogether — Digital Legal Literacy Curriculums for Teens" },
       {
         name: "description",
         content:
-          "Free, teen-friendly guides to your digital rights, online safety, and the law behind the apps you use.",
+          "BraverTogether offers free digital legal literacy curriculums, quick-reference cheat sheets, online safety resources, and youth legal advisors.",
       },
-      { property: "og:title", content: "BraverTogether — Digital Legal Literacy for Teens" },
+      { property: "og:title", content: "BraverTogether — Digital Legal Literacy Curriculums for Teens" },
       { property: "og:description", content: "Know your rights online. No law degree required." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

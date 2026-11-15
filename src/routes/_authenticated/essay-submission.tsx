@@ -135,6 +135,15 @@ function formatBytes(bytes: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatUtcDate(value: string | null): string {
+  if (!value) return "To be announced";
+  const time = Date.parse(value);
+  if (!Number.isFinite(time)) return "To be announced";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC",
+  }).format(new Date(time)) + " UTC";
+}
+
 function toForm(state: PortalState): FormState {
   const submission = state.submission;
   const registration = state.registration;
@@ -634,8 +643,8 @@ function CompetitionStatus({ competition }: { competition: Competition }) {
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Age" value={competition.minimum_age === null ? `${competition.maximum_age} and under` : `${competition.minimum_age}–${competition.maximum_age}`} />
         <Stat label="Word count" value={wordRange(competition.minimum_words, competition.maximum_words)} />
-        <Stat label="Opens" value={competition.opens_at ? new Date(competition.opens_at).toLocaleString() : "To be announced"} />
-        <Stat label="Closes" value={competition.closes_at ? new Date(competition.closes_at).toLocaleString() : "To be announced"} />
+        <Stat label="Opens" value={formatUtcDate(competition.opens_at)} />
+        <Stat label="Closes" value={formatUtcDate(competition.closes_at)} />
       </div>
       {competition.rules_url && (
         <a href={competition.rules_url} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex text-sm font-semibold text-teal hover:underline">

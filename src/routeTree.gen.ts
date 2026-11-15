@@ -9,101 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TeamRouteImport } from './routes/team'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SafetyRouteImport } from './routes/safety'
-import { Route as ResourcesRouteImport } from './routes/resources'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as NewsRouteImport } from './routes/news'
-import { Route as EventsRouteImport } from './routes/events'
-import { Route as DecoderRouteImport } from './routes/decoder'
-import { Route as CompetitionsRouteImport } from './routes/competitions'
-import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdvisorsRouteImport } from './routes/advisors'
-import { Route as AdvisorSignupRouteImport } from './routes/advisor-signup'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$slug'
-import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
-import { Route as ApiNeonSignupRouteImport } from './routes/api/neon-signup'
-import { Route as ApiNeonLegacyLoginRouteImport } from './routes/api/neon-legacy-login'
-import { Route as ApiNeonAuthEmailWebhookRouteImport } from './routes/api/neon-auth-email-webhook'
-import { Route as ApiNeonAccountRouteImport } from './routes/api/neon-account'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
-import { Route as AuthenticatedMeetingsRouteImport } from './routes/_authenticated/meetings'
-import { Route as AuthenticatedEssaySubmissionRouteImport } from './routes/_authenticated/essay-submission'
-import { Route as AuthenticatedAdvisorApplicationRouteImport } from './routes/_authenticated/advisor-application'
-import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin-reports'
-import { Route as AuthenticatedAdminCompetitionsRouteImport } from './routes/_authenticated/admin-competitions'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdvisorSignupRouteImport } from './routes/advisor-signup'
+import { Route as AdvisorsRouteImport } from './routes/advisors'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
+import { Route as CompetitionsRouteImport } from './routes/competitions'
+import { Route as CurriculumsRouteImport } from './routes/curriculums'
+import { Route as DecoderRouteImport } from './routes/decoder'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as AuthenticatedAdminAdvisorsRouteImport } from './routes/_authenticated/admin-advisors'
+import { Route as AuthenticatedAdminCompetitionsRouteImport } from './routes/_authenticated/admin-competitions'
+import { Route as AuthenticatedAdminCurriculumsRouteImport } from './routes/_authenticated/admin-curriculums'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin-reports'
+import { Route as AuthenticatedAdvisorApplicationRouteImport } from './routes/_authenticated/advisor-application'
+import { Route as AuthenticatedEssaySubmissionRouteImport } from './routes/_authenticated/essay-submission'
+import { Route as AuthenticatedMeetingsRouteImport } from './routes/_authenticated/meetings'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as ApiCurriculumFileRouteImport } from './routes/api/curriculum-file'
+import { Route as ApiCurriculumUploadRouteImport } from './routes/api/curriculum-upload'
+import { Route as ApiNeonAccountRouteImport } from './routes/api/neon-account'
+import { Route as ApiNeonAuthEmailWebhookRouteImport } from './routes/api/neon-auth-email-webhook'
+import { Route as ApiNeonLegacyLoginRouteImport } from './routes/api/neon-legacy-login'
+import { Route as ApiNeonSignupRouteImport } from './routes/api/neon-signup'
+import { Route as ApiSignupEmailCheckRouteImport } from './routes/api/signup-email-check'
+import { Route as CompetitionsSlugRouteImport } from './routes/competitions_.$slug'
 import { Route as ApiNeonAuthSplatRouteImport } from './routes/api/neon-auth/$'
 
-const TeamRoute = TeamRouteImport.update({
-  id: '/team',
-  path: '/team',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SafetyRoute = SafetyRouteImport.update({
-  id: '/safety',
-  path: '/safety',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesRoute = ResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsRoute = NewsRouteImport.update({
-  id: '/news',
-  path: '/news',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DecoderRoute = DecoderRouteImport.update({
-  id: '/decoder',
-  path: '/decoder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompetitionsRoute = CompetitionsRouteImport.update({
-  id: '/competitions',
-  path: '/competitions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
-  id: '/community-guidelines',
-  path: '/community-guidelines',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdvisorsRoute = AdvisorsRouteImport.update({
-  id: '/advisors',
-  path: '/advisors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdvisorSignupRoute = AdvisorSignupRouteImport.update({
-  id: '/advisor-signup',
-  path: '/advisor-signup',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -111,76 +59,80 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const AdvisorSignupRoute = AdvisorSignupRouteImport.update({
+  id: '/advisor-signup',
+  path: '/advisor-signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdvisorsRoute = AdvisorsRouteImport.update({
+  id: '/advisors',
+  path: '/advisors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompetitionsSlugRoute = CompetitionsSlugRouteImport.update({
-  id: '/competitions_/$slug',
-  path: '/competitions/$slug',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSignupEmailCheckRoute = ApiSignupEmailCheckRouteImport.update({
-  id: '/api/signup-email-check',
-  path: '/api/signup-email-check',
+const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
+  id: '/community-guidelines',
+  path: '/community-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiNeonSignupRoute = ApiNeonSignupRouteImport.update({
-  id: '/api/neon-signup',
-  path: '/api/neon-signup',
+const CompetitionsRoute = CompetitionsRouteImport.update({
+  id: '/competitions',
+  path: '/competitions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiNeonLegacyLoginRoute = ApiNeonLegacyLoginRouteImport.update({
-  id: '/api/neon-legacy-login',
-  path: '/api/neon-legacy-login',
+const CurriculumsRoute = CurriculumsRouteImport.update({
+  id: '/curriculums',
+  path: '/curriculums',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiNeonAuthEmailWebhookRoute = ApiNeonAuthEmailWebhookRouteImport.update({
-  id: '/api/neon-auth-email-webhook',
-  path: '/api/neon-auth-email-webhook',
+const DecoderRoute = DecoderRouteImport.update({
+  id: '/decoder',
+  path: '/decoder',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiNeonAccountRoute = ApiNeonAccountRouteImport.update({
-  id: '/api/neon-account',
-  path: '/api/neon-account',
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedMeetingsRoute = AuthenticatedMeetingsRouteImport.update({
-  id: '/meetings',
-  path: '/meetings',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedEssaySubmissionRoute =
-  AuthenticatedEssaySubmissionRouteImport.update({
-    id: '/essay-submission',
-    path: '/essay-submission',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdvisorApplicationRoute =
-  AuthenticatedAdvisorApplicationRouteImport.update({
-    id: '/advisor-application',
-    path: '/advisor-application',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminReportsRoute =
-  AuthenticatedAdminReportsRouteImport.update({
-    id: '/admin-reports',
-    path: '/admin-reports',
+const SafetyRoute = SafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminAdvisorsRoute =
+  AuthenticatedAdminAdvisorsRouteImport.update({
+    id: '/admin-advisors',
+    path: '/admin-advisors',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminCompetitionsRoute =
@@ -189,12 +141,85 @@ const AuthenticatedAdminCompetitionsRoute =
     path: '/admin-competitions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminAdvisorsRoute =
-  AuthenticatedAdminAdvisorsRouteImport.update({
-    id: '/admin-advisors',
-    path: '/admin-advisors',
+const AuthenticatedAdminCurriculumsRoute =
+  AuthenticatedAdminCurriculumsRouteImport.update({
+    id: '/admin-curriculums',
+    path: '/admin-curriculums',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/admin-reports',
+    path: '/admin-reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdvisorApplicationRoute =
+  AuthenticatedAdvisorApplicationRouteImport.update({
+    id: '/advisor-application',
+    path: '/advisor-application',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEssaySubmissionRoute =
+  AuthenticatedEssaySubmissionRouteImport.update({
+    id: '/essay-submission',
+    path: '/essay-submission',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMeetingsRoute = AuthenticatedMeetingsRouteImport.update({
+  id: '/meetings',
+  path: '/meetings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiCurriculumFileRoute = ApiCurriculumFileRouteImport.update({
+  id: '/api/curriculum-file',
+  path: '/api/curriculum-file',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCurriculumUploadRoute = ApiCurriculumUploadRouteImport.update({
+  id: '/api/curriculum-upload',
+  path: '/api/curriculum-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNeonAccountRoute = ApiNeonAccountRouteImport.update({
+  id: '/api/neon-account',
+  path: '/api/neon-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNeonAuthEmailWebhookRoute = ApiNeonAuthEmailWebhookRouteImport.update({
+  id: '/api/neon-auth-email-webhook',
+  path: '/api/neon-auth-email-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNeonLegacyLoginRoute = ApiNeonLegacyLoginRouteImport.update({
+  id: '/api/neon-legacy-login',
+  path: '/api/neon-legacy-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNeonSignupRoute = ApiNeonSignupRouteImport.update({
+  id: '/api/neon-signup',
+  path: '/api/neon-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSignupEmailCheckRoute = ApiSignupEmailCheckRouteImport.update({
+  id: '/api/signup-email-check',
+  path: '/api/signup-email-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitionsSlugRoute = CompetitionsSlugRouteImport.update({
+  id: '/competitions_/$slug',
+  path: '/competitions/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNeonAuthSplatRoute = ApiNeonAuthSplatRouteImport.update({
   id: '/api/neon-auth/$',
   path: '/api/neon-auth/$',
@@ -209,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
+  '/curriculums': typeof CurriculumsRoute
   '/decoder': typeof DecoderRoute
   '/events': typeof EventsRoute
   '/news': typeof NewsRoute
@@ -219,12 +245,15 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/admin-advisors': typeof AuthenticatedAdminAdvisorsRoute
   '/admin-competitions': typeof AuthenticatedAdminCompetitionsRoute
+  '/admin-curriculums': typeof AuthenticatedAdminCurriculumsRoute
   '/admin-reports': typeof AuthenticatedAdminReportsRoute
   '/advisor-application': typeof AuthenticatedAdvisorApplicationRoute
   '/essay-submission': typeof AuthenticatedEssaySubmissionRoute
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/curriculum-file': typeof ApiCurriculumFileRoute
+  '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
@@ -241,6 +270,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
+  '/curriculums': typeof CurriculumsRoute
   '/decoder': typeof DecoderRoute
   '/events': typeof EventsRoute
   '/news': typeof NewsRoute
@@ -251,12 +281,15 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/admin-advisors': typeof AuthenticatedAdminAdvisorsRoute
   '/admin-competitions': typeof AuthenticatedAdminCompetitionsRoute
+  '/admin-curriculums': typeof AuthenticatedAdminCurriculumsRoute
   '/admin-reports': typeof AuthenticatedAdminReportsRoute
   '/advisor-application': typeof AuthenticatedAdvisorApplicationRoute
   '/essay-submission': typeof AuthenticatedEssaySubmissionRoute
   '/meetings': typeof AuthenticatedMeetingsRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/curriculum-file': typeof ApiCurriculumFileRoute
+  '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
@@ -275,6 +308,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/community-guidelines': typeof CommunityGuidelinesRoute
   '/competitions': typeof CompetitionsRoute
+  '/curriculums': typeof CurriculumsRoute
   '/decoder': typeof DecoderRoute
   '/events': typeof EventsRoute
   '/news': typeof NewsRoute
@@ -285,12 +319,15 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/_authenticated/admin-advisors': typeof AuthenticatedAdminAdvisorsRoute
   '/_authenticated/admin-competitions': typeof AuthenticatedAdminCompetitionsRoute
+  '/_authenticated/admin-curriculums': typeof AuthenticatedAdminCurriculumsRoute
   '/_authenticated/admin-reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/advisor-application': typeof AuthenticatedAdvisorApplicationRoute
   '/_authenticated/essay-submission': typeof AuthenticatedEssaySubmissionRoute
   '/_authenticated/meetings': typeof AuthenticatedMeetingsRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/curriculum-file': typeof ApiCurriculumFileRoute
+  '/api/curriculum-upload': typeof ApiCurriculumUploadRoute
   '/api/neon-account': typeof ApiNeonAccountRoute
   '/api/neon-auth-email-webhook': typeof ApiNeonAuthEmailWebhookRoute
   '/api/neon-legacy-login': typeof ApiNeonLegacyLoginRoute
@@ -309,6 +346,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community-guidelines'
     | '/competitions'
+    | '/curriculums'
     | '/decoder'
     | '/events'
     | '/news'
@@ -319,12 +357,15 @@ export interface FileRouteTypes {
     | '/team'
     | '/admin-advisors'
     | '/admin-competitions'
+    | '/admin-curriculums'
     | '/admin-reports'
     | '/advisor-application'
     | '/essay-submission'
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/api/curriculum-file'
+    | '/api/curriculum-upload'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
@@ -341,6 +382,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community-guidelines'
     | '/competitions'
+    | '/curriculums'
     | '/decoder'
     | '/events'
     | '/news'
@@ -351,12 +393,15 @@ export interface FileRouteTypes {
     | '/team'
     | '/admin-advisors'
     | '/admin-competitions'
+    | '/admin-curriculums'
     | '/admin-reports'
     | '/advisor-application'
     | '/essay-submission'
     | '/meetings'
     | '/messages'
     | '/profile'
+    | '/api/curriculum-file'
+    | '/api/curriculum-upload'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
@@ -374,6 +419,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community-guidelines'
     | '/competitions'
+    | '/curriculums'
     | '/decoder'
     | '/events'
     | '/news'
@@ -384,12 +430,15 @@ export interface FileRouteTypes {
     | '/team'
     | '/_authenticated/admin-advisors'
     | '/_authenticated/admin-competitions'
+    | '/_authenticated/admin-curriculums'
     | '/_authenticated/admin-reports'
     | '/_authenticated/advisor-application'
     | '/_authenticated/essay-submission'
     | '/_authenticated/meetings'
     | '/_authenticated/messages'
     | '/_authenticated/profile'
+    | '/api/curriculum-file'
+    | '/api/curriculum-upload'
     | '/api/neon-account'
     | '/api/neon-auth-email-webhook'
     | '/api/neon-legacy-login'
@@ -408,6 +457,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
   CompetitionsRoute: typeof CompetitionsRoute
+  CurriculumsRoute: typeof CurriculumsRoute
   DecoderRoute: typeof DecoderRoute
   EventsRoute: typeof EventsRoute
   NewsRoute: typeof NewsRoute
@@ -416,6 +466,8 @@ export interface RootRouteChildren {
   SafetyRoute: typeof SafetyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TeamRoute: typeof TeamRoute
+  ApiCurriculumFileRoute: typeof ApiCurriculumFileRoute
+  ApiCurriculumUploadRoute: typeof ApiCurriculumUploadRoute
   ApiNeonAccountRoute: typeof ApiNeonAccountRoute
   ApiNeonAuthEmailWebhookRoute: typeof ApiNeonAuthEmailWebhookRoute
   ApiNeonLegacyLoginRoute: typeof ApiNeonLegacyLoginRoute
@@ -427,102 +479,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/team': {
-      id: '/team'
-      path: '/team'
-      fullPath: '/team'
-      preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/safety': {
-      id: '/safety'
-      path: '/safety'
-      fullPath: '/safety'
-      preLoaderRoute: typeof SafetyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources': {
-      id: '/resources'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news': {
-      id: '/news'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/decoder': {
-      id: '/decoder'
-      path: '/decoder'
-      fullPath: '/decoder'
-      preLoaderRoute: typeof DecoderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/competitions': {
-      id: '/competitions'
-      path: '/competitions'
-      fullPath: '/competitions'
-      preLoaderRoute: typeof CompetitionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community-guidelines': {
-      id: '/community-guidelines'
-      path: '/community-guidelines'
-      fullPath: '/community-guidelines'
-      preLoaderRoute: typeof CommunityGuidelinesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/advisors': {
-      id: '/advisors'
-      path: '/advisors'
-      fullPath: '/advisors'
-      preLoaderRoute: typeof AdvisorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/advisor-signup': {
-      id: '/advisor-signup'
-      path: '/advisor-signup'
-      fullPath: '/advisor-signup'
-      preLoaderRoute: typeof AdvisorSignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -532,95 +493,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/competitions_/$slug': {
-      id: '/competitions_/$slug'
-      path: '/competitions/$slug'
-      fullPath: '/competitions/$slug'
-      preLoaderRoute: typeof CompetitionsSlugRouteImport
+    '/advisor-signup': {
+      id: '/advisor-signup'
+      path: '/advisor-signup'
+      fullPath: '/advisor-signup'
+      preLoaderRoute: typeof AdvisorSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/signup-email-check': {
-      id: '/api/signup-email-check'
-      path: '/api/signup-email-check'
-      fullPath: '/api/signup-email-check'
-      preLoaderRoute: typeof ApiSignupEmailCheckRouteImport
+    '/advisors': {
+      id: '/advisors'
+      path: '/advisors'
+      fullPath: '/advisors'
+      preLoaderRoute: typeof AdvisorsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/neon-signup': {
-      id: '/api/neon-signup'
-      path: '/api/neon-signup'
-      fullPath: '/api/neon-signup'
-      preLoaderRoute: typeof ApiNeonSignupRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/neon-legacy-login': {
-      id: '/api/neon-legacy-login'
-      path: '/api/neon-legacy-login'
-      fullPath: '/api/neon-legacy-login'
-      preLoaderRoute: typeof ApiNeonLegacyLoginRouteImport
+    '/community-guidelines': {
+      id: '/community-guidelines'
+      path: '/community-guidelines'
+      fullPath: '/community-guidelines'
+      preLoaderRoute: typeof CommunityGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/neon-auth-email-webhook': {
-      id: '/api/neon-auth-email-webhook'
-      path: '/api/neon-auth-email-webhook'
-      fullPath: '/api/neon-auth-email-webhook'
-      preLoaderRoute: typeof ApiNeonAuthEmailWebhookRouteImport
+    '/competitions': {
+      id: '/competitions'
+      path: '/competitions'
+      fullPath: '/competitions'
+      preLoaderRoute: typeof CompetitionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/neon-account': {
-      id: '/api/neon-account'
-      path: '/api/neon-account'
-      fullPath: '/api/neon-account'
-      preLoaderRoute: typeof ApiNeonAccountRouteImport
+    '/curriculums': {
+      id: '/curriculums'
+      path: '/curriculums'
+      fullPath: '/curriculums'
+      preLoaderRoute: typeof CurriculumsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/decoder': {
+      id: '/decoder'
+      path: '/decoder'
+      fullPath: '/decoder'
+      preLoaderRoute: typeof DecoderRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/messages': {
-      id: '/_authenticated/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/meetings': {
-      id: '/_authenticated/meetings'
-      path: '/meetings'
-      fullPath: '/meetings'
-      preLoaderRoute: typeof AuthenticatedMeetingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/essay-submission': {
-      id: '/_authenticated/essay-submission'
-      path: '/essay-submission'
-      fullPath: '/essay-submission'
-      preLoaderRoute: typeof AuthenticatedEssaySubmissionRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/advisor-application': {
-      id: '/_authenticated/advisor-application'
-      path: '/advisor-application'
-      fullPath: '/advisor-application'
-      preLoaderRoute: typeof AuthenticatedAdvisorApplicationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin-reports': {
-      id: '/_authenticated/admin-reports'
-      path: '/admin-reports'
-      fullPath: '/admin-reports'
-      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+    '/safety': {
+      id: '/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin-advisors': {
+      id: '/_authenticated/admin-advisors'
+      path: '/admin-advisors'
+      fullPath: '/admin-advisors'
+      preLoaderRoute: typeof AuthenticatedAdminAdvisorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin-competitions': {
@@ -630,12 +612,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCompetitionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin-advisors': {
-      id: '/_authenticated/admin-advisors'
-      path: '/admin-advisors'
-      fullPath: '/admin-advisors'
-      preLoaderRoute: typeof AuthenticatedAdminAdvisorsRouteImport
+    '/_authenticated/admin-curriculums': {
+      id: '/_authenticated/admin-curriculums'
+      path: '/admin-curriculums'
+      fullPath: '/admin-curriculums'
+      preLoaderRoute: typeof AuthenticatedAdminCurriculumsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-reports': {
+      id: '/_authenticated/admin-reports'
+      path: '/admin-reports'
+      fullPath: '/admin-reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/advisor-application': {
+      id: '/_authenticated/advisor-application'
+      path: '/advisor-application'
+      fullPath: '/advisor-application'
+      preLoaderRoute: typeof AuthenticatedAdvisorApplicationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/essay-submission': {
+      id: '/_authenticated/essay-submission'
+      path: '/essay-submission'
+      fullPath: '/essay-submission'
+      preLoaderRoute: typeof AuthenticatedEssaySubmissionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meetings': {
+      id: '/_authenticated/meetings'
+      path: '/meetings'
+      fullPath: '/meetings'
+      preLoaderRoute: typeof AuthenticatedMeetingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/curriculum-file': {
+      id: '/api/curriculum-file'
+      path: '/api/curriculum-file'
+      fullPath: '/api/curriculum-file'
+      preLoaderRoute: typeof ApiCurriculumFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/curriculum-upload': {
+      id: '/api/curriculum-upload'
+      path: '/api/curriculum-upload'
+      fullPath: '/api/curriculum-upload'
+      preLoaderRoute: typeof ApiCurriculumUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/neon-account': {
+      id: '/api/neon-account'
+      path: '/api/neon-account'
+      fullPath: '/api/neon-account'
+      preLoaderRoute: typeof ApiNeonAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/neon-auth-email-webhook': {
+      id: '/api/neon-auth-email-webhook'
+      path: '/api/neon-auth-email-webhook'
+      fullPath: '/api/neon-auth-email-webhook'
+      preLoaderRoute: typeof ApiNeonAuthEmailWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/neon-legacy-login': {
+      id: '/api/neon-legacy-login'
+      path: '/api/neon-legacy-login'
+      fullPath: '/api/neon-legacy-login'
+      preLoaderRoute: typeof ApiNeonLegacyLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/neon-signup': {
+      id: '/api/neon-signup'
+      path: '/api/neon-signup'
+      fullPath: '/api/neon-signup'
+      preLoaderRoute: typeof ApiNeonSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/signup-email-check': {
+      id: '/api/signup-email-check'
+      path: '/api/signup-email-check'
+      fullPath: '/api/signup-email-check'
+      preLoaderRoute: typeof ApiSignupEmailCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitions_/$slug': {
+      id: '/competitions_/$slug'
+      path: '/competitions/$slug'
+      fullPath: '/competitions/$slug'
+      preLoaderRoute: typeof CompetitionsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/neon-auth/$': {
       id: '/api/neon-auth/$'
@@ -650,6 +730,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAdvisorsRoute: typeof AuthenticatedAdminAdvisorsRoute
   AuthenticatedAdminCompetitionsRoute: typeof AuthenticatedAdminCompetitionsRoute
+  AuthenticatedAdminCurriculumsRoute: typeof AuthenticatedAdminCurriculumsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdvisorApplicationRoute: typeof AuthenticatedAdvisorApplicationRoute
   AuthenticatedEssaySubmissionRoute: typeof AuthenticatedEssaySubmissionRoute
@@ -661,6 +742,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAdvisorsRoute: AuthenticatedAdminAdvisorsRoute,
   AuthenticatedAdminCompetitionsRoute: AuthenticatedAdminCompetitionsRoute,
+  AuthenticatedAdminCurriculumsRoute: AuthenticatedAdminCurriculumsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdvisorApplicationRoute: AuthenticatedAdvisorApplicationRoute,
   AuthenticatedEssaySubmissionRoute: AuthenticatedEssaySubmissionRoute,
@@ -681,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CommunityGuidelinesRoute: CommunityGuidelinesRoute,
   CompetitionsRoute: CompetitionsRoute,
+  CurriculumsRoute: CurriculumsRoute,
   DecoderRoute: DecoderRoute,
   EventsRoute: EventsRoute,
   NewsRoute: NewsRoute,
@@ -689,6 +772,8 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyRoute: SafetyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TeamRoute: TeamRoute,
+  ApiCurriculumFileRoute: ApiCurriculumFileRoute,
+  ApiCurriculumUploadRoute: ApiCurriculumUploadRoute,
   ApiNeonAccountRoute: ApiNeonAccountRoute,
   ApiNeonAuthEmailWebhookRoute: ApiNeonAuthEmailWebhookRoute,
   ApiNeonLegacyLoginRoute: ApiNeonLegacyLoginRoute,

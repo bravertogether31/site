@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 const offerings = [
   { icon: Users, title: "About", desc: "Meet Tara and learn the mission behind a platform built so teens can finally access digital legal knowledge.", cta: "Meet Tara & Our Mission", to: "/about" as const },
-  { icon: BookOpen, title: "Resources", desc: "A growing video library on privacy, social media law, digital contracts, cyberbullying and more.", cta: "Explore the Resource Library", to: "/resources" as const },
+  { icon: BookOpen, title: "Curriculums", desc: "Country-focused digital legal literacy curriculums and quick-reference cheat sheets, with video lessons too.", cta: "Explore Curriculums", to: "/curriculums" as const },
   { icon: FileSearch, title: "Contract Decoder", desc: "Paste any Terms & Conditions, privacy policy, or digital agreement. Get back exactly what you're signing up for.", cta: "Try the Contract Decoder", to: "/decoder" as const },
   { icon: MessageCircle, title: "Ask an Advisor", desc: "Connect with student volunteers volunteering their time. Free, informational, judgment-free.", cta: "Talk to an Advisor", to: "/advisors" as const },
   { icon: Trophy, title: "Competitions", desc: "Essay competitions with cash prizes and other ways to engage with digital rights and get recognised.", cta: "See Competitions", to: "/competitions" as const },
@@ -43,8 +43,8 @@ function Home() {
               <Link to="/decoder" className="inline-flex items-center gap-2 rounded-full bg-mesh text-white px-6 py-3 font-semibold shadow-glow hover:brightness-110 transition">
                 <Sparkles className="h-4 w-4" /> Decode a Contract
               </Link>
-              <Link to="/resources" className="inline-flex items-center gap-2 rounded-full border border-navy-deep/20 bg-white/70 px-6 py-3 font-semibold text-navy-deep backdrop-blur hover:bg-white transition">
-                Browse Resources <ArrowRight className="h-4 w-4" />
+              <Link to="/curriculums" search={{ tab: undefined }} className="inline-flex items-center gap-2 rounded-full border border-navy-deep/20 bg-white/70 px-6 py-3 font-semibold text-navy-deep backdrop-blur hover:bg-white transition">
+                Browse Curriculums <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 

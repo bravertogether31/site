@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
+  BookOpen,
   ChevronDown,
   Inbox,
   LogIn,
@@ -26,7 +27,8 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
-  { to: "/resources", label: "Resources" },
+  { to: "/advisors", label: "Digital Legal Advisors" },
+  { to: "/curriculums", label: "Curriculums" },
   { to: "/competitions", label: "Competitions" },
   { to: "/events", label: "Events" },
 ] as const;
@@ -62,7 +64,7 @@ function AccountLink({
   messageView,
   onNavigate,
 }: {
-  to: "/messages" | "/meetings" | "/profile" | "/admin-advisors" | "/admin-competitions" | "/admin-reports";
+  to: "/messages" | "/meetings" | "/profile" | "/admin-advisors" | "/admin-competitions" | "/admin-reports" | "/admin-curriculums";
   label: string;
   icon: ElementType;
   messageView?: "queue";
@@ -161,6 +163,7 @@ function AuthControls({
         </span>
         <AccountLink to="/admin-advisors" label="Advisor Applications" icon={UserRoundPlus} onNavigate={onNavigate} />
         <AccountLink to="/admin-competitions" label="Competition Admin" icon={Trophy} onNavigate={onNavigate} />
+        <AccountLink to="/admin-curriculums" label="Curriculum Editor" icon={BookOpen} onNavigate={onNavigate} />
         <AccountLink to="/admin-reports" label="Safety Reports" icon={ShieldCheck} onNavigate={onNavigate} />
         <AccountLink to="/profile" label="My Profile" icon={UserIcon} onNavigate={onNavigate} />
         <button onClick={handleSignOut} className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground">
@@ -269,12 +272,6 @@ function DesktopAccountControls({ access }: { access: AccountAccessHook }) {
     return (
       <div className="hidden shrink-0 items-center gap-2 xl:flex">
         <Link
-          to="/advisors"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-teal/30 bg-teal/5 px-3 py-2 text-xs font-semibold text-teal transition hover:bg-teal/10"
-        >
-          <MessageCircle className="h-3.5 w-3.5" /> Ask an Advisor
-        </Link>
-        <Link
           to="/auth"
           className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-navy px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:opacity-90"
         >
@@ -338,6 +335,7 @@ function DesktopAccountControls({ access }: { access: AccountAccessHook }) {
               <Link to="/admin-reports" onClick={close} className={itemClass}><ShieldCheck className="h-4 w-4 text-teal" /> Safety Reports</Link>
               <Link to="/admin-advisors" onClick={close} className={itemClass}><UserRoundPlus className="h-4 w-4 text-teal" /> Advisor Applications</Link>
               <Link to="/admin-competitions" onClick={close} className={itemClass}><Trophy className="h-4 w-4 text-teal" /> Competition Admin</Link>
+              <Link to="/admin-curriculums" onClick={close} className={itemClass}><BookOpen className="h-4 w-4 text-teal" /> Curriculum Editor</Link>
               <Link to="/profile" onClick={close} className={itemClass}><UserIcon className="h-4 w-4 text-teal" /> My Profile</Link>
             </>
           ) : role === "advisor" ? (
@@ -392,7 +390,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
-                className="bt-nav-link whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                className="bt-nav-link whitespace-nowrap rounded-md px-2 py-2 text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
                 activeProps={{ className: "text-foreground bg-secondary" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
@@ -506,7 +504,6 @@ function FooterLinks({ access }: { access: AccountAccessHook }) {
     return (
       <ul className="space-y-2 text-sm text-white/70">
         {publicLinks}
-        <li><Link to="/advisors" className="hover:text-white">Ask an Advisor</Link></li>
         <li><AdvisorIntentTrigger className="inline-flex items-center gap-1.5 font-semibold text-teal-soft hover:text-white"><UserRoundPlus className="h-3.5 w-3.5" /> Apply to be an Advisor</AdvisorIntentTrigger></li>
       </ul>
     );
@@ -518,6 +515,7 @@ function FooterLinks({ access }: { access: AccountAccessHook }) {
         {publicLinks}
         <li><Link to="/admin-advisors" className="hover:text-white">Advisor Applications</Link></li>
         <li><Link to="/admin-competitions" className="hover:text-white">Competition Admin</Link></li>
+        <li><Link to="/admin-curriculums" className="hover:text-white">Curriculum Editor</Link></li>
         <li><Link to="/profile" className="hover:text-white">Administrator Profile</Link></li>
       </ul>
     );

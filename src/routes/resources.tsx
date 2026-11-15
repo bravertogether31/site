@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { BrainCircuit, ExternalLink, Lock, MessageCircle, Play, Search, ShieldCheck, Sparkles, Users, Video } from "lucide-react";
@@ -48,9 +48,10 @@ function Resources() {
       <div className="bg-hero relative overflow-hidden">
         <div className="absolute inset-0 dot-pattern opacity-50" />
         <Section className="py-24 relative">
-          <Eyebrow><Video className="h-3.5 w-3.5" /> Video Resource Library</Eyebrow>
+          <Eyebrow><Video className="h-3.5 w-3.5" /> Video Lessons</Eyebrow>
           <h1 className="mt-4 text-5xl sm:text-6xl font-bold max-w-3xl text-navy-deep">Digital law explained through videos you can actually follow.</h1>
           <p className="mt-6 text-navy-deep/70 max-w-2xl text-lg">Short, practical lessons on privacy, contracts, online safety, AI and your rights. New videos will be added as they are published.</p>
+          <Link to="/curriculums" search={{ tab: undefined }} className="mt-6 inline-flex rounded-full border border-teal/30 bg-white px-5 py-2.5 text-sm font-semibold text-teal hover:bg-teal/5">Browse Curriculums & Cheat Sheets</Link>
         </Section>
       </div>
 
