@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { listPublicCompetitions } from "@/lib/competition.functions";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -10,7 +11,7 @@ const RESUME_KEY = "braver_competition_resume";
 /**
  * Invite prospective essay entrants to create or use an account once per tab.
  * The submission portal, not the modal, stores the actual entrant registration.
- * Non-essay pages and existing logged-in users are left untouched.
+ * Existing logged-in users are left untouched.
  */
 export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { slug: string; acceptingSubmissions: boolean }) {
   const { user, loading } = useAuth();
@@ -29,6 +30,11 @@ export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { s
     window.sessionStorage.setItem(RESUME_KEY, slug);
     setOpen(false);
     void navigate({ to: "/auth", search: { mode } });
+  };
+
+  const browseCompetition = () => {
+    setOpen(false);
+    void navigate({ to: "/competitions/$slug", params: { slug } });
   };
 
   if (loading || user || !acceptingSubmissions) return null;
@@ -54,11 +60,43 @@ export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { s
             Already a member? Sign in
           </button>
         </div>
-        <button type="button" onClick={() => setOpen(false)}
+        <button type="button" onClick={browseCompetition}
           className="mt-3 text-sm text-muted-foreground underline underline-offset-2">
           Browse competition details first
         </button>
       </DialogContent>
     </Dialog>
   );
+}
+
+/**
+ * Show the essay invitation on the homepage, never as a surprise when a
+ * visitor opens a competition's detail page. Only advertise an open essay.
+ * Client-side loading keeps the homepage available if competition data fails.
+ */
+export function HomepageEssayCompetitionPrompt() {
+  const { user, loading } = useAuth();
+  const [essaySlug, setEssaySlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (loading || user) return;
+
+    let cancelled = false;
+    void listPublicCompetitions()
+      .then((competitions) => {
+        if (cancelled) return;
+        const openEssay = competitions.find(
+          (competition) => competition.category === "essay" && competition.acceptingSubmissions,
+        );
+        if (openEssay) setEssaySlug(openEssay.slug);
+      })
+      .catch(() => {
+        // Never prevent the homepage from loading if competitions are unavailable.
+      });
+
+    return () => { cancelled = true; };
+  }, [loading, user]);
+
+  if (loading || user || !essaySlug) return null;
+  return <EssayCompetitionSignupDialog slug={essaySlug} acceptingSubmissions />;
 }

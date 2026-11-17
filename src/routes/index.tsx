@@ -3,6 +3,7 @@ import { SITE_COPY_DEFAULTS } from "@/lib/site-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, FileSearch, MessageCircle, Trophy, Users, Sparkles, ShieldCheck, Lock, Scale, Globe2 } from "lucide-react";
 import { SiteLayout, Section, Eyebrow } from "@/components/SiteLayout";
+import { HomepageEssayCompetitionPrompt } from "@/components/EssayCompetitionSignupDialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +30,7 @@ function Home() {
   const copy = usePublicSiteCopy();
   return (
     <SiteLayout>
+      <HomepageEssayCompetitionPrompt />
       {/* HERO */}
       <div className="relative overflow-hidden bg-hero">
         <div className="absolute inset-0 dot-pattern opacity-60" />

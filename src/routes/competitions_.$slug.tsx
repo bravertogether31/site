@@ -2,7 +2,6 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { ExternalLink, Mic2 } from 'lucide-react';
 
 import { SiteLayout, Section, Eyebrow } from '@/components/SiteLayout';
-import { EssayCompetitionSignupDialog } from '@/components/EssayCompetitionSignupDialog';
 import { getPublicCompetition } from '@/lib/competition.functions';
 import { publiclyAnnouncedResultsAt } from '@/lib/competition-rules';
 
@@ -44,7 +43,6 @@ function Competition() {
 
   return (
     <SiteLayout>
-      <EssayCompetitionSignupDialog slug={c.slug} acceptingSubmissions={c.acceptingSubmissions} />
       <div className="bg-hero">
         <Section>
           <Eyebrow>{c.acceptingSubmissions ? 'Submissions open' : 'Submissions closed'}</Eyebrow>
