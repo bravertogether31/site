@@ -12,8 +12,8 @@ function completedAccountUser(user: User | null | undefined): User | null {
 let cachedUser: User | null | undefined;
 let pendingUserRequest: Promise<User | null> | null = null;
 
-function loadCurrentUser(): Promise<User | null> {
-  if (cachedUser !== undefined) return Promise.resolve(cachedUser);
+function loadCurrentUser(fresh = false): Promise<User | null> {
+  if (!fresh && cachedUser !== undefined) return Promise.resolve(cachedUser);
   if (!pendingUserRequest) {
     const neonSession = async (): Promise<{ data: { user: User | null } }> => {
       // A single first-party request validates the Neon session AND the
@@ -39,9 +39,11 @@ function loadCurrentUser(): Promise<User | null> {
         return cachedUser;
       })
       .catch((error) => {
-        console.warn("[Auth] Could not verify the current user. Continuing signed out for now.", error);
+        console.warn("[Auth] Could not verify the current user. Keeping the previous display state.", error);
+        throw error;
+      })
+      .finally(() => {
         pendingUserRequest = null;
-        return null;
       });
   }
   return pendingUserRequest;
@@ -54,20 +56,32 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
-    void loadCurrentUser().then((nextUser) => {
-      if (!mounted) return;
-      setUser(nextUser);
-      setLoading(false);
-    });
+    void loadCurrentUser()
+      .then((nextUser) => {
+        if (!mounted) return;
+        setUser(nextUser);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Unknown status should not leave the header stuck on a loading pulse.
+        if (mounted) setLoading(false);
+      });
 
     if (neonMode) {
       const refresh = () => {
-        cachedUser = undefined;
-        pendingUserRequest = null;
-        setLoading(true);
-        void loadCurrentUser().then((nextUser) => {
-          if (mounted) { setUser(nextUser); setLoading(false); }
-        });
+        // Keep cachedUser intact during the request. Route remounts must
+        // retain the previous verified header (including anonymous users)
+        // instead of treating a background refresh as a first-time load.
+        // The shared in-flight request also prevents duplicate fetches from
+        // every useAuth instance listening for the same focus event.
+        void loadCurrentUser(true)
+          .then((nextUser) => {
+            if (mounted) { setUser(nextUser); setLoading(false); }
+          })
+          .catch(() => {
+            // Temporary connectivity errors do not imply sign-out.
+            if (mounted) setLoading(false);
+          });
       };
       window.addEventListener("braver-neon-auth-change", refresh);
       window.addEventListener("focus", refresh);
@@ -101,7 +115,7 @@ export function useAuth() {
     });
     if (!response.ok) throw new Error("Sign out could not be completed.");
     cachedUser = null;
-    pendingUserRequest = Promise.resolve(null);
+    pendingUserRequest = null;
     window.dispatchEvent(new Event("braver-neon-auth-change"));
     return { error: null };
   };

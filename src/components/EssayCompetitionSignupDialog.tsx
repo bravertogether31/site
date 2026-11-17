@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { listPublicCompetitions } from "@/lib/competition.functions";
@@ -16,7 +16,9 @@ const RESUME_KEY = "braver_competition_resume";
 export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { slug: string; acceptingSubmissions: boolean }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [navigating, setNavigating] = useState<"auth" | "competition" | null>(null);
 
   useEffect(() => {
     if (loading || user || !acceptingSubmissions || !/^[a-z0-9-]{1,120}$/.test(slug)) return;
@@ -26,15 +28,32 @@ export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { s
     setOpen(true);
   }, [loading, user, slug, acceptingSubmissions]);
 
+  useEffect(() => {
+    if (!open || !/^[a-z0-9-]{1,120}$/.test(slug)) return;
+    // Load the competition details while the invitation is being read.
+    // The click can then navigate using the already-prepared route.
+    void router.preloadRoute({ to: "/competitions/$slug", params: { slug } }).catch(() => {
+      // A failed prefetch should not prevent normal navigation on click.
+    });
+  }, [open, router, slug]);
+
   const begin = (mode: "signup" | "signin") => {
+    if (navigating) return;
     window.sessionStorage.setItem(RESUME_KEY, slug);
-    setOpen(false);
-    void navigate({ to: "/auth", search: { mode } });
+    setNavigating("auth");
+    // Keep the dialog in place until the destination replaces this page;
+    // closing it first exposes and reanimates the homepage during loading.
+    void navigate({ to: "/auth", search: { mode } }).catch(() => {
+      setNavigating(null);
+    });
   };
 
   const browseCompetition = () => {
-    setOpen(false);
-    void navigate({ to: "/competitions/$slug", params: { slug } });
+    if (navigating) return;
+    setNavigating("competition");
+    void navigate({ to: "/competitions/$slug", params: { slug } }).catch(() => {
+      setNavigating(null);
+    });
   };
 
   if (loading || user || !acceptingSubmissions) return null;
@@ -51,18 +70,19 @@ export function EssayCompetitionSignupDialog({ slug, acceptingSubmissions }: { s
           </DialogDescription>
         </DialogHeader>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <button type="button" onClick={() => begin("signup")}
+          <button type="button" onClick={() => begin("signup")} disabled={Boolean(navigating)}
             className="rounded-full bg-navy px-5 py-3 font-semibold text-white">
             Create free account
           </button>
-          <button type="button" onClick={() => begin("signin")}
+          <button type="button" onClick={() => begin("signin")} disabled={Boolean(navigating)}
             className="rounded-full border border-border px-5 py-3 font-semibold">
             Already a member? Sign in
           </button>
         </div>
-        <button type="button" onClick={browseCompetition}
-          className="mt-3 text-sm text-muted-foreground underline underline-offset-2">
-          Browse competition details first
+        <button type="button" onClick={browseCompetition} disabled={Boolean(navigating)}
+          aria-busy={Boolean(navigating)}
+          className="mt-3 text-sm text-muted-foreground underline underline-offset-2 disabled:cursor-progress">
+          {navigating === "competition" ? "Opening competition details…" : "Browse competition details first"}
         </button>
       </DialogContent>
     </Dialog>
